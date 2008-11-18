@@ -8,7 +8,7 @@ config NET_VENDOR_8390
 	depends on NET_VENDOR_NATSEMI && (AMIGA_PCMCIA || PCI || SUPERH || \
 		   ISA || MCA || EISA || MAC || M32R || MACH_TX49XX || \
 		   MCA_LEGACY || H8300 || ARM || MIPS || ZORRO || PCMCIA || \
-		   EXPERIMENTAL)
+		   ATARI_ROM_ISA || EXPERIMENTAL)
 	---help---
 	  If you have a network (Ethernet) card belonging to this class, say Y
 	  and read the Ethernet-HOWTO, available from
@@ -225,6 +225,14 @@ config APNE
 
 	  To compile this driver as a module, choose M here: the module
 	  will be called apne.
+
+config ATARI_ETHERNEC
+	tristate "Atari EtherNEC Ethernet support"
+	depends on ATARI_ROM_ISA
+	help
+	  Say Y to include support for the EtherNEC network adapter for the
+	  ROM port. The driver works by polling instead of interrupts, so it
+	  is quite slow.
 
 config NE3210
 	tristate "Novell/Eagle/Microdyne NE3210 EISA support (EXPERIMENTAL)"
