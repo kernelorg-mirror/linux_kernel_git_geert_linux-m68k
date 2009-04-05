@@ -49,6 +49,8 @@ supports different types of boards, you can use a construct like::
 	...
     }
 
+// FIXME Convert to zorro_driver
+
 
 Zorro Resources
 ---------------

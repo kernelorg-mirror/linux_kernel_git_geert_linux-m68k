@@ -360,5 +360,7 @@ MODULE_AUTHOR("Joerg Dorchain <joerg@dorchain.net>");
 MODULE_DESCRIPTION("Parport Driver for Multiface 3 expansion cards Parallel Port");
 MODULE_LICENSE("GPL");
 
+// FIXME Convert to zorro_driver
+
 module_init(parport_mfc3_init)
 module_exit(parport_mfc3_exit)
