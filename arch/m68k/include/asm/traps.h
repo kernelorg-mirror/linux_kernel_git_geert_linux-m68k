@@ -267,6 +267,37 @@ struct frame {
     } un;
 };
 
+#ifdef CONFIG_M68000
+
+struct frame68000 {
+    struct {
+	long     d1;
+	long     d2;
+	long     d3;
+	long     d4;
+	long     d5;
+	long     a0;
+	long     a1;
+	long     a2;
+	long     d0;
+	long     orig_d0;
+	long     stkadj;
+    } ptregs;
+    /* MC68000 Bus or Address Error Exception Stack Frame */
+    struct {
+	unsigned unused : 11;
+	unsigned rw     :  1;		     /* read(1)/write(0) */
+	unsigned in     :  1;		     /* instruction(0)/not(1) */
+	unsigned fc     :  3;		     /* function code */
+	unsigned long faddr;		     /* fault address */
+	unsigned short ir;		     /* instruction register */
+	unsigned short sr;		     /* status register */
+	unsigned long pc;		     /* program counter */
+    } fmt;
+};
+
+#endif /* M68000 */
+
 #endif /* __ASSEMBLY__ */
 
 #endif /* _M68K_TRAPS_H */
