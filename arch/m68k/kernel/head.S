@@ -952,6 +952,8 @@ L(nocon):
 
 	leds	0x4
 
+#ifdef CONFIG_MMU
+
 /*
  *	mmu_init
  *
@@ -1403,6 +1405,8 @@ L(mmu_fixup_done):
 
 	mmu_engage
 
+#endif /* CONFIG_MMU */
+
 /*
  * After this point no new memory is allocated and
  * the start of available memory is stored in availmem.
@@ -1486,6 +1490,8 @@ L(mmu_fixup_done):
 	putc	'I'
 	leds	0x10
 
+#ifdef CONFIG_MMU /* FIXME */
+
 /*
  * Enable caches
  */
@@ -1524,6 +1530,8 @@ L(cache68030):
 	jra	L(cache_done)
 	.chip	68k
 L(cache_done):
+
+#endif /* CONFIG_MMU */
 
 	putc	'J'
 
@@ -1574,6 +1582,8 @@ func_start	get_bi_record,%d1
 4:
 func_return	get_bi_record
 
+
+#ifdef CONFIG_MMU
 
 /*
  *	MMU Initialization Begins Here
@@ -2760,6 +2770,7 @@ func_start	get_new_page,%d0/%a1
 
 func_return	get_new_page
 
+#endif /* CONFIG_MMU */
 
 
 /*
