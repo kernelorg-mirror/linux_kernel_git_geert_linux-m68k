@@ -636,8 +636,11 @@ early_param("debug", amiga_savekmsg_setup);
 static void amiga_serial_putc(char c)
 {
 	amiga_custom.serdat = (unsigned char)c | 0x100;
+#ifndef CONFIG_AMIGA_UAE
+	/* UAE hangs while polling the serial port */
 	while (!(amiga_custom.serdatr & 0x2000))
 		;
+#endif /* CONFIG_AMIGA_UAE */
 }
 
 static void amiga_serial_console_write(struct console *co, const char *s,
@@ -707,6 +710,56 @@ void amiga_serial_gets(struct console *co, char *s, int len)
 }
 #endif
 
+#ifdef CONFIG_AMIGA_UAE_DEBUG
+
+#define RTAREA_BASE	0xF00000
+
+    /*
+     *  Print a string to the UAE console. UAE will add a line feed.
+     */
+
+static inline void uae_puts(const char *s)
+{
+	register const char *a0 __asm("a0") = s;
+	register unsigned long a1 __asm("a1") = RTAREA_BASE + 0xFF10;
+
+	__asm __volatile ("jsr %%a1@"
+			  :  /* no output */
+			  : "r" (a0), "r" (a1)
+			  : "memory");
+}
+
+static void amiga_uae_console_write(struct console *co, const char *s,
+				    unsigned int count)
+{
+	static char buf[1024];
+	static unsigned int n = 0;
+	char c;
+
+	while (count-- > 0) {
+		c = *s++;
+		if (c == '\n') {
+			buf[n] = '\0';
+			uae_puts(buf);
+			n = 0;
+		} else {
+			buf[n++] = c;
+			if (n == sizeof(buf)-1) {
+				uae_puts(buf);
+				n = 0;
+			}
+		}
+	}
+#ifdef CONFIG_AMIGA_UAE_DEBUG_SYNC
+	if (n > 0) {
+		buf[n] = '\0';
+		uae_puts(buf);
+		n = 0;
+	}
+#endif /* CONFIG_AMIGA_UAE_DEBUG_SYNC */
+}
+#endif /* CONFIG_AMIGA_UAE_DEBUG */
+
 static int __init amiga_debug_setup(char *arg)
 {
 	if (MACH_IS_AMIGA && !strcmp(arg, "ser")) {
@@ -714,6 +767,12 @@ static int __init amiga_debug_setup(char *arg)
 		amiga_console_driver.write = amiga_serial_console_write;
 		register_console(&amiga_console_driver);
 	}
+#ifdef CONFIG_AMIGA_UAE_DEBUG
+	else if (MACH_IS_AMIGA && !strcmp(arg, "uae")) {
+		amiga_console_driver.write = amiga_uae_console_write;
+		register_console(&amiga_console_driver);
+	}
+#endif /* CONFIG_AMIGA_UAE_DEBUG */
 	return 0;
 }
 

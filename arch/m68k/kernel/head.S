@@ -3018,7 +3018,10 @@ func_start	serial_putc,%d0/%d1/%a0/%a1
 1:	movew	%a0@(CUSTOMBASE+C_SERDATR),%d0
 #endif /* 68020 or higher */
 	andw	#0x2000,%d0
+#ifndef CONFIG_AMIGA_UAE
+	/* UAE hangs while polling the serial port */
 	jeq	1b
+#endif /* CONFIG_AMIGA_UAE */
 	jra	L(serial_putc_done)
 2:
 #endif

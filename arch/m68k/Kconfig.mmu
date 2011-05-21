@@ -423,6 +423,32 @@ config AMIGA_PCMCIA
 	  Include support in the kernel for pcmcia on Amiga 1200 and Amiga
 	  600. If you intend to use pcmcia cards say Y; otherwise say N.
 
+config AMIGA_UAE
+	bool "Ubiquitous Amiga Emulator support"
+	depends on AMIGA && !MMU
+	help
+         Include support for running uClinux under UAE, the Ubiquitous Amiga
+         Emulator. If you intend to run uClinux under UAE, say Y here.
+
+config AMIGA_UAE_DEBUG
+	bool "UAE debug console"
+	depends on AMIGA_UAE
+	help
+	  Include debug support for the Ubiquitous Amiga Emulator console.
+	  Say Y here if you intend to run uClinux under UAE and want to be able
+	  to redirect all kernel messages to the UAE console using the
+	  "debug=uae" kernel argument.
+
+config AMIGA_UAE_DEBUG_SYNC
+	bool "Synchronous UAE debug console"
+	depends on AMIGA_UAE_DEBUG
+	help
+	  The UAE console can print complete lines (incl. terminating line
+	  feed) only. This means that the most recent incomplete line in the
+	  kernel output may get stuck in a buffer until it is completed later.
+	  Say Y here to print incomplete lines synchronously, at the expense
+	  of additional line feeds in the output.
+
 config STRAM_PROC
 	bool "ST-RAM statistics in /proc"
 	depends on ATARI
