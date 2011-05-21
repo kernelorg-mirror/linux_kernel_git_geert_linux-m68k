@@ -207,16 +207,27 @@ struct frame {
     struct pt_regs ptregs;
     union {
 	    struct {
+		    /* Four-Word Stack Frame */
+	    } fmt0;
+	    struct {
+		    /* Throwaway Four-Word Stack Frame */
+	    } fmt1;
+	    struct {
+		    /* Six-Word Stack Frame */
 		    unsigned long  iaddr;    /* instruction address */
 	    } fmt2;
 	    struct {
+		    /* MC68040 Floating-Point Post-Instruction Stack Frame */
 		    unsigned long  effaddr;  /* effective address */
 	    } fmt3;
 	    struct {
+		    /* MC68EC040 and MC68LC040 Floating-Point Unimplemented */
+		    /* Stack Frame */
 		    unsigned long  effaddr;  /* effective address */
 		    unsigned long  pc;	     /* pc of faulted instr */
 	    } fmt4;
 	    struct {
+		    /* MC68040 Access Error Stack Frame */
 		    unsigned long  effaddr;  /* effective address */
 		    unsigned short ssw;      /* special status word */
 		    unsigned short wb3s;     /* write back 3 status */
@@ -234,10 +245,25 @@ struct frame {
 		    unsigned long  pd3;      /* push data 3*/
 	    } fmt7;
 	    struct {
+		    /* MC68010 Bus and Address Error Stack Frame */
+		    unsigned short ssw;	     /* special statu word */
+		    unsigned long faddr;     /* fault address */
+		    unsigned short resv1;    /* unused, reserved */
+		    unsigned short dobuf;    /* data output buffer */
+		    unsigned short resv2;    /* unused, reserved */
+		    unsigned short dibuf;    /* data input buffer */
+		    unsigned short resv3;    /* unused, reserved */
+		    unsigned short iobuf;    /* instruction output buffer */
+		    unsigned short int1[16]; /* internal information */
+	    } fmt8;
+	    struct {
+		    /* MC68020 Bus and MC68030 Coprocessor Mid-Instruction */
+		    /* Stack Frame */
 		    unsigned long  iaddr;    /* instruction address */
 		    unsigned short int1[4];  /* internal registers */
 	    } fmt9;
 	    struct {
+		    /* MC68020 and MC68030 Short Bus Cycle Stack Frame */
 		    unsigned short int1;
 		    unsigned short ssw;      /* special status word */
 		    unsigned short isc;      /* instruction stage c */
@@ -248,6 +274,7 @@ struct frame {
 		    unsigned short int3[2];
 	    } fmta;
 	    struct {
+		    /* MC68020 and MC68030 Long Bus Cycle Stack Frame */
 		    unsigned short int1;
 		    unsigned short ssw;     /* special status word */
 		    unsigned short isc;     /* instruction stage c */
@@ -264,6 +291,20 @@ struct frame {
 		    unsigned	   int6:12;
 		    unsigned short int7[18];
 	    } fmtb;
+	    struct {
+		    /* CPU32 Bus Error Stack Frame */
+		    unsigned long faddr;     /* fault address */
+		    unsigned long dbuf;	     /* dbuf */
+		    unsigned long cipc;	     /* current instruction program */
+					     /* counter */
+		    unsigned short itcr;     /* internal transfer counter */
+					     /* register */
+		    unsigned format :  2;    /* format */
+			    /* 0: Bus Error for Prefetches and Operands */
+			    /* 1: Bus Error on MOVEM Operand Stack */
+			    /* 2: Four- and Six-Word Bus Error Stack */
+		    unsigned ssw    : 14;    /* special status word */
+	    } fmtc;
     } un;
 };
 
