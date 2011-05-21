@@ -292,6 +292,16 @@
 
 #endif	/* CONFIG_MAC */
 
+#if defined(CONFIG_M68000) || defined(CONFIG_M68010)
+/*
+ *  68000 and 68010 don't support 32-bit PC-relative addressing, hence use
+ *  absolute addressing instead
+ */
+#define PCREL32(x)	(x)
+#else /* 68020 or higher */
+#define PCREL32(x)	%pc@(x)
+#endif
+
 #undef MMU_PRINT
 #undef MMU_NOCACHE_KERNEL
 #define SERIAL_DEBUG
@@ -524,7 +534,7 @@ func_define	putn,1
 .Lstr\@:
 	.string	"\string"
 	__FINIT
-	pea	%pc@(.Lstr\@)
+	pea	PCREL32(.Lstr\@)
 	func_call	puts
 	addql	#4,%sp
 #endif
@@ -536,33 +546,33 @@ func_define	putn,1
 #endif
 .endm
 
-#define is_not_amiga(lab) cmpl &MACH_AMIGA,%pc@(m68k_machtype); jne lab
-#define is_not_atari(lab) cmpl &MACH_ATARI,%pc@(m68k_machtype); jne lab
-#define is_not_mac(lab) cmpl &MACH_MAC,%pc@(m68k_machtype); jne lab
-#define is_not_mvme147(lab) cmpl &MACH_MVME147,%pc@(m68k_machtype); jne lab
-#define is_not_mvme16x(lab) cmpl &MACH_MVME16x,%pc@(m68k_machtype); jne lab
-#define is_not_bvme6000(lab) cmpl &MACH_BVME6000,%pc@(m68k_machtype); jne lab
-#define is_mvme147(lab) cmpl &MACH_MVME147,%pc@(m68k_machtype); jeq lab
-#define is_mvme16x(lab) cmpl &MACH_MVME16x,%pc@(m68k_machtype); jeq lab
-#define is_bvme6000(lab) cmpl &MACH_BVME6000,%pc@(m68k_machtype); jeq lab
-#define is_not_hp300(lab) cmpl &MACH_HP300,%pc@(m68k_machtype); jne lab
-#define is_not_apollo(lab) cmpl &MACH_APOLLO,%pc@(m68k_machtype); jne lab
-#define is_not_q40(lab) cmpl &MACH_Q40,%pc@(m68k_machtype); jne lab
-#define is_not_sun3x(lab) cmpl &MACH_SUN3X,%pc@(m68k_machtype); jne lab
+#define is_not_amiga(lab) cmpl &MACH_AMIGA,PCREL32(m68k_machtype); jne lab
+#define is_not_atari(lab) cmpl &MACH_ATARI,PCREL32(m68k_machtype); jne lab
+#define is_not_mac(lab) cmpl &MACH_MAC,PCREL32(m68k_machtype); jne lab
+#define is_not_mvme147(lab) cmpl &MACH_MVME147,PCREL32(m68k_machtype); jne lab
+#define is_not_mvme16x(lab) cmpl &MACH_MVME16x,PCREL32(m68k_machtype); jne lab
+#define is_not_bvme6000(lab) cmpl &MACH_BVME6000,PCREL32(m68k_machtype); jne lab
+#define is_mvme147(lab) cmpl &MACH_MVME147,PCREL32(m68k_machtype); jeq lab
+#define is_mvme16x(lab) cmpl &MACH_MVME16x,PCREL32(m68k_machtype); jeq lab
+#define is_bvme6000(lab) cmpl &MACH_BVME6000,PCREL32(m68k_machtype); jeq lab
+#define is_not_hp300(lab) cmpl &MACH_HP300,PCREL32(m68k_machtype); jne lab
+#define is_not_apollo(lab) cmpl &MACH_APOLLO,PCREL32(m68k_machtype); jne lab
+#define is_not_q40(lab) cmpl &MACH_Q40,PCREL32(m68k_machtype); jne lab
+#define is_not_sun3x(lab) cmpl &MACH_SUN3X,PCREL32(m68k_machtype); jne lab
 
-#define hasnt_leds(lab) cmpl &MACH_HP300,%pc@(m68k_machtype); \
+#define hasnt_leds(lab) cmpl &MACH_HP300,PCREL32(m68k_machtype); \
 			jeq 42f; \
-			cmpl &MACH_APOLLO,%pc@(m68k_machtype); \
+			cmpl &MACH_APOLLO,PCREL32(m68k_machtype); \
 			jne lab ;\
 		42:\
 
-#define is_040_or_060(lab)	btst &CPUTYPE_0460,%pc@(L(cputype)+3); jne lab
-#define is_not_040_or_060(lab)	btst &CPUTYPE_0460,%pc@(L(cputype)+3); jeq lab
-#define is_040(lab)		btst &CPUTYPE_040,%pc@(L(cputype)+3); jne lab
-#define is_060(lab)		btst &CPUTYPE_060,%pc@(L(cputype)+3); jne lab
-#define is_not_060(lab)		btst &CPUTYPE_060,%pc@(L(cputype)+3); jeq lab
-#define is_020(lab)		btst &CPUTYPE_020,%pc@(L(cputype)+3); jne lab
-#define is_not_020(lab)		btst &CPUTYPE_020,%pc@(L(cputype)+3); jeq lab
+#define is_040_or_060(lab)	btst &CPUTYPE_0460,PCREL32(L(cputype)+3); jne lab
+#define is_not_040_or_060(lab)	btst &CPUTYPE_0460,PCREL32(L(cputype)+3); jeq lab
+#define is_040(lab)		btst &CPUTYPE_040,PCREL32(L(cputype)+3); jne lab
+#define is_060(lab)		btst &CPUTYPE_060,PCREL32(L(cputype)+3); jne lab
+#define is_not_060(lab)		btst &CPUTYPE_060,PCREL32(L(cputype)+3); jeq lab
+#define is_020(lab)		btst &CPUTYPE_020,PCREL32(L(cputype)+3); jne lab
+#define is_not_020(lab)		btst &CPUTYPE_020,PCREL32(L(cputype)+3); jeq lab
 
 /* On the HP300 we use the on-board LEDs for debug output before
    the console is running.  Writing a 1 bit turns the corresponding LED
@@ -608,25 +618,25 @@ ENTRY(__start)
 /*
  * Setup initial stack pointer
  */
-	lea	%pc@(_stext),%sp
+	lea	PCREL32(_stext),%sp
 
 /*
  * Record the CPU and machine type.
  */
 	get_bi_record	BI_MACHTYPE
-	lea	%pc@(m68k_machtype),%a1
+	lea	PCREL32(m68k_machtype),%a1
 	movel	%a0@,%a1@
 
 	get_bi_record	BI_FPUTYPE
-	lea	%pc@(m68k_fputype),%a1
+	lea	PCREL32(m68k_fputype),%a1
 	movel	%a0@,%a1@
 
 	get_bi_record	BI_MMUTYPE
-	lea	%pc@(m68k_mmutype),%a1
+	lea	PCREL32(m68k_mmutype),%a1
 	movel	%a0@,%a1@
 
 	get_bi_record	BI_CPUTYPE
-	lea	%pc@(m68k_cputype),%a1
+	lea	PCREL32(m68k_cputype),%a1
 	movel	%a0@,%a1@
 
 	leds	0x1
@@ -640,24 +650,24 @@ ENTRY(__start)
 	is_not_mac(L(test_notmac))
 
 	get_bi_record	BI_MAC_VADDR
-	lea	%pc@(L(mac_videobase)),%a1
+	lea	PCREL32(L(mac_videobase)),%a1
 	movel	%a0@,%a1@
 
 	get_bi_record	BI_MAC_VDEPTH
-	lea	%pc@(L(mac_videodepth)),%a1
+	lea	PCREL32(L(mac_videodepth)),%a1
 	movel	%a0@,%a1@
 
 	get_bi_record	BI_MAC_VDIM
-	lea	%pc@(L(mac_dimensions)),%a1
+	lea	PCREL32(L(mac_dimensions)),%a1
 	movel	%a0@,%a1@
 
 	get_bi_record	BI_MAC_VROW
-	lea	%pc@(L(mac_rowbytes)),%a1
+	lea	PCREL32(L(mac_rowbytes)),%a1
 	movel	%a0@,%a1@
 
 #ifdef MAC_SERIAL_DEBUG
 	get_bi_record	BI_MAC_SCCBASE
-	lea	%pc@(L(mac_sccbase)),%a1
+	lea	PCREL32(L(mac_sccbase)),%a1
 	movel	%a0@,%a1@
 #endif /* MAC_SERIAL_DEBUG */
 
@@ -665,14 +675,14 @@ ENTRY(__start)
 	/*
 	 * Clear the screen
 	 */
-	lea	%pc@(L(mac_videobase)),%a0
+	lea	PCREL32(L(mac_videobase)),%a0
 	movel	%a0@,%a1
-	lea	%pc@(L(mac_dimensions)),%a0
+	lea	PCREL32(L(mac_dimensions)),%a0
 	movel	%a0@,%d1
 	swap	%d1		/* #rows is high bytes */
 	andl	#0xFFFF,%d1	/* rows */
 	subl	#10,%d1
-	lea	%pc@(L(mac_rowbytes)),%a0
+	lea	PCREL32(L(mac_rowbytes)),%a0
 loopy2:
 	movel	%a0@,%d0
 	subql	#1,%d0
@@ -692,7 +702,7 @@ L(test_notmac):
  * and is converted here from a booter type definition to a separate bit
  * number which allows for the standard is_0x0 macro tests.
  */
-	movel	%pc@(m68k_cputype),%d0
+	movel	PCREL32(m68k_cputype),%d0
 	/*
 	 * Assume it's an 030
 	 */
@@ -727,7 +737,7 @@ L(test_notmac):
 	/*
 	 * Record the cpu type
 	 */
-	lea	%pc@(L(cputype)),%a0
+	lea	PCREL32(L(cputype)),%a0
 	movel	%d1,%a0@
 
 	/*
@@ -776,9 +786,9 @@ L(test_notmac):
 L(save_cachetype):
 	/* Save cache mode for supervisor mode and page tables
 	 */
-	lea	%pc@(m68k_supervisor_cachemode),%a0
+	lea	PCREL32(m68k_supervisor_cachemode),%a0
 	movel	%d0,%a0@
-	lea	%pc@(m68k_pgtable_cachemode),%a0
+	lea	PCREL32(m68k_pgtable_cachemode),%a0
 	movel	%d1,%a0@
 
 /*
@@ -814,7 +824,7 @@ L(save_cachetype):
 	tstl	%d0
 	jbmi	1f
 	movel	%a0@,%d3
-	lea	%pc@(atari_mch_type),%a0
+	lea	PCREL32(atari_mch_type),%a0
 	movel	%d3,%a0@
 1:
 	/* On the Hades, the iobase must be set up before opening the
@@ -823,7 +833,7 @@ L(save_cachetype):
 	cmpl	#ATARI_MACH_HADES,%d3
 	jbne	1f
 	movel	#0xff000000,%d0		/* Hades I/O base addr: 0xff000000 */
-1:	lea     %pc@(L(iobase)),%a0
+1:	lea     PCREL32(L(iobase)),%a0
 	movel   %d0,%a0@
 
 L(notypetest):
@@ -844,7 +854,7 @@ L(getvmetype):
 	tstl	%d0
 	jbmi	1f
 	movel	%a0@,%d3
-	lea	%pc@(vme_brdtype),%a0
+	lea	PCREL32(vme_brdtype),%a0
 	movel	%d3,%a0@
 1:
 #ifdef CONFIG_MVME16x
@@ -864,7 +874,7 @@ L(getvmetype):
 	.word	0x70		/* trap 0x70 - .BRD_ID */
 	movel	%sp@+,%a0
 1:
-	lea	%pc@(mvme_bdid),%a1
+	lea	PCREL32(mvme_bdid),%a1
 	/* Structure is 32 bytes long */
 	movel	%a0@+,%a1@+
 	movel	%a0@+,%a1@+
@@ -888,13 +898,13 @@ L(gvtdone):
 	tstl	%d0
 	jbmi	1f
 	movel	%a0@,%d3
-	lea	%pc@(L(uartbase)),%a0
+	lea	PCREL32(L(uartbase)),%a0
 	movel	%d3,%a0@
 	get_bi_record	BI_HP300_UART_SCODE
 	tstl	%d0
 	jbmi	1f
 	movel	%a0@,%d3
-	lea	%pc@(L(uart_scode)),%a0
+	lea	PCREL32(L(uart_scode)),%a0
 	movel	%d3,%a0@
 1:
 L(nothp):
@@ -924,16 +934,16 @@ L(nocon):
 	putc	'\n'
 	putc	'A'
 	leds	0x2
-	dputn	%pc@(L(cputype))
-	dputn	%pc@(m68k_supervisor_cachemode)
-	dputn	%pc@(m68k_pgtable_cachemode)
+	dputn	PCREL32(L(cputype))
+	dputn	PCREL32(m68k_supervisor_cachemode)
+	dputn	PCREL32(m68k_pgtable_cachemode)
 	dputc	'\n'
 
 /*
  * Save physical start address of kernel
  */
-	lea	%pc@(L(phys_kernel_start)),%a0
-	lea	%pc@(_stext),%a1
+	lea	PCREL32(L(phys_kernel_start)),%a0
+	lea	PCREL32(_stext),%a1
 	subl	#_stext,%a1
 	addl	#PAGE_OFFSET,%a1
 	movel	%a1,%a0@
@@ -950,8 +960,8 @@ L(nocon):
  *	First map the first 4 MB of kernel code & data
  */
 
-	mmu_map	#PAGE_OFFSET,%pc@(L(phys_kernel_start)),#4*1024*1024,\
-		%pc@(m68k_supervisor_cachemode)
+	mmu_map	#PAGE_OFFSET,PCREL32(L(phys_kernel_start)),#4*1024*1024,\
+		PCREL32(m68k_supervisor_cachemode)
 
 	putc	'C'
 
@@ -1015,7 +1025,7 @@ L(mmu_init_atari):
 
 	/* I/O base addr for non-Medusa, non-Hades: 0x00000000 */
 	moveq	#0,%d0
-	movel	%pc@(atari_mch_type),%d3
+	movel	PCREL32(atari_mch_type),%d3
 	cmpl	#ATARI_MACH_MEDUSA,%d3
 	jbeq	2f
 	cmpl	#ATARI_MACH_HADES,%d3
@@ -1202,7 +1212,7 @@ L(mmu_init_mac):
 	 */
 
 	movel	#VIDEOMEMMASK,%d0
-	andl	%pc@(L(mac_videobase)),%d0
+	andl	PCREL32(L(mac_videobase)),%d0
 
 	mmu_map		#VIDEOMEMBASE,%d0,#VIDEOMEMSIZE,%d3
 	/* ROM from 4000 0000 to 4200 0000 (only for mac_reset()) */
@@ -1303,15 +1313,15 @@ L(mmu_fixup):
 	/* first fix the page at the start of the kernel, that
 	 * contains also kernel_pg_dir.
 	 */
-	movel	%pc@(L(phys_kernel_start)),%d0
+	movel	PCREL32(L(phys_kernel_start)),%d0
 	subl	#PAGE_OFFSET,%d0
-	lea	%pc@(_stext),%a0
+	lea	PCREL32(_stext),%a0
 	subl	%d0,%a0
 	mmu_fixup_page_mmu_cache	%a0
 
-	movel	%pc@(L(kernel_end)),%a0
+	movel	PCREL32(L(kernel_end)),%a0
 	subl	%d0,%a0
-	movel	%pc@(L(memory_start)),%a1
+	movel	PCREL32(L(memory_start)),%a1
 	subl	%d0,%a1
 	bra	2f
 1:
@@ -1422,7 +1432,7 @@ L(mmu_fixup_done):
 	addl	#VIDEOMEMBASE,%d0
 	movel	%d0,L(mac_videobase)
 #if defined(CONSOLE)
-	movel	%pc@(L(phys_kernel_start)),%d0
+	movel	PCREL32(L(phys_kernel_start)),%d0
 	subl	#PAGE_OFFSET,%d0
 	subl	%d0,L(console_font)
 	subl	%d0,L(console_font_data)
@@ -1548,7 +1558,7 @@ L(cache_done):
 func_start	get_bi_record,%d1
 
 	movel	ARG1,%d0
-	lea	%pc@(_end),%a0
+	lea	PCREL32(_end),%a0
 1:	tstw	%a0@(BIR_TAG)
 	jeq	3f
 	cmpw	%a0@(BIR_TAG),%d0
@@ -1652,8 +1662,8 @@ func_return	get_bi_record
 
 func_start	mmu_print,%a0-%a6/%d0-%d7
 
-	movel	%pc@(L(kernel_pgdir_ptr)),%a5
-	lea	%pc@(L(mmu_print_data)),%a0
+	movel	PCREL32(L(kernel_pgdir_ptr)),%a5
+	lea	PCREL32(L(mmu_print_data)),%a0
 	movel	#MMU_PRINT_UNINITED,%a0@(mmu_next_valid)
 
 	is_not_040_or_060(mmu_030_print)
@@ -1728,7 +1738,7 @@ mmu_040_print:
 	jbra	1b
 #endif /* MMU 040 Dumping code that's gory and detailed */
 
-	lea	%pc@(kernel_pg_dir),%a5
+	lea	PCREL32(kernel_pg_dir),%a5
 	movel	%a5,%a0			/* a0 has the address of the root table ptr */
 	movel	#0x00000000,%a4		/* logical address */
 	moveql	#0,%d0
@@ -1770,7 +1780,7 @@ mmu_040_print:
 	movel	%a4,%d0
 	movel	%d6,%d1
 	andil	#0xfffff4e0,%d1
-	lea	%pc@(mmu_040_print_flags),%a6
+	lea	PCREL32(mmu_040_print_flags),%a6
 	jbsr	mmu_print_tuple
 	moveml	%sp@+,%d0-%d1
 46:
@@ -1926,7 +1936,7 @@ mmu_030_print_helper:
 	moveml	%d0-%d1,%sp@-
 	movel	%a4,%d0
 	movel	%d6,%d1
-	lea	%pc@(mmu_030_print_flags),%a6
+	lea	PCREL32(mmu_030_print_flags),%a6
 	jbsr	mmu_print_tuple
 	moveml	%sp@+,%d0-%d1
 	rts
@@ -1934,7 +1944,7 @@ mmu_030_print_helper:
 mmu_print_tuple_invalidate:
 	moveml	%a0/%d7,%sp@-
 
-	lea	%pc@(L(mmu_print_data)),%a0
+	lea	PCREL32(L(mmu_print_data)),%a0
 	tstl	%a0@(mmu_next_valid)
 	jbmi	mmu_print_tuple_invalidate_exit
 
@@ -1952,7 +1962,7 @@ mmu_print_tuple_invalidate_exit:
 mmu_print_tuple:
 	moveml	%d0-%d7/%a0,%sp@-
 
-	lea	%pc@(L(mmu_print_data)),%a0
+	lea	PCREL32(L(mmu_print_data)),%a0
 
 	tstl	%a0@(mmu_next_valid)
 	jble	mmu_print_tuple_print
@@ -2345,7 +2355,7 @@ func_start	mmu_fixup_page_mmu_cache,%d0/%a0
 
 	movel	%a0@,%d0
 	andil	#_CACHEMASK040,%d0
-	orl	%pc@(m68k_pgtable_cachemode),%d0
+	orl	PCREL32(m68k_pgtable_cachemode),%d0
 	movel	%d0,%a0@
 
 	dputc	'\n'
@@ -2366,7 +2376,7 @@ func_start	mmu_temp_map,%d0/%d1/%a0/%a1
 	dputn	ARG2
 	dputc	'\n'
 
-	lea	%pc@(L(temp_mmap_mem)),%a1
+	lea	PCREL32(L(temp_mmap_mem)),%a1
 
 	/* Calculate the offset in the root table
 	 */
@@ -2378,7 +2388,7 @@ func_start	mmu_temp_map,%d0/%d1/%a0/%a1
 	/* Check if the table is temporary allocated, so we have to reuse it
 	 */
 	movel	%a0@,%d0
-	cmpl	%pc@(L(memory_start)),%d0
+	cmpl	PCREL32(L(memory_start)),%d0
 	jcc	1f
 
 	/* Temporary allocate a ptr table and insert it into the root table
@@ -2450,16 +2460,16 @@ func_start	mmu_engage,%d0-%d2/%a0-%a3
 
 	moveq	#ROOT_TABLE_SIZE-1,%d0
 	/* Temporarily use a different root table.  */
-	lea	%pc@(L(kernel_pgdir_ptr)),%a0
+	lea	PCREL32(L(kernel_pgdir_ptr)),%a0
 	movel	%a0@,%a2
-	movel	%pc@(L(memory_start)),%a1
+	movel	PCREL32(L(memory_start)),%a1
 	movel	%a1,%a0@
 	movel	%a2,%a0
 1:
 	movel	%a0@+,%a1@+
 	dbra	%d0,1b
 
-	lea	%pc@(L(temp_mmap_mem)),%a0
+	lea	PCREL32(L(temp_mmap_mem)),%a0
 	movel	%a1,%a0@
 
 	movew	#PAGESIZE-1,%d0
@@ -2467,7 +2477,7 @@ func_start	mmu_engage,%d0-%d2/%a0-%a3
 	clrl	%a1@+
 	dbra	%d0,1b
 
-	lea	%pc@(1b),%a0
+	lea	PCREL32(1b),%a0
 	movel	#1b,%a1
 	/* Skip temp mappings if phys == virt */
 	cmpl	%a0,%a1
@@ -2481,8 +2491,8 @@ func_start	mmu_engage,%d0-%d2/%a0-%a3
 	mmu_temp_map	%a0,%a0
 	mmu_temp_map	%a0,%a1
 1:
-	movel	%pc@(L(memory_start)),%a3
-	movel	%pc@(L(phys_kernel_start)),%d2
+	movel	PCREL32(L(memory_start)),%a3
+	movel	PCREL32(L(phys_kernel_start)),%d2
 
 	is_not_040_or_060(L(mmu_engage_030))
 
@@ -2510,7 +2520,7 @@ L(mmu_engage_030_temp):
 	.space	12
 L(mmu_engage_030):
 	.chip	68030
-	lea	%pc@(L(mmu_engage_030_temp)),%a0
+	lea	PCREL32(L(mmu_engage_030_temp)),%a0
 	movel	#0x80000002,%a0@
 	movel	%a3,%a0@(4)
 	movel	#0x0808,%d0
@@ -2549,7 +2559,7 @@ func_start	mmu_get_root_table_entry,%d0/%a1
 	dputs	" ="
 #endif
 
-	movel	%pc@(L(kernel_pgdir_ptr)),%a0
+	movel	PCREL32(L(kernel_pgdir_ptr)),%a0
 	tstl	%a0
 	jne	2f
 
@@ -2566,21 +2576,21 @@ func_start	mmu_get_root_table_entry,%d0/%a1
 
 	dputn	%d0
 
-	lea	%pc@(L(memory_start)),%a0
+	lea	PCREL32(L(memory_start)),%a0
 	movel	%d0,%a0@
-	lea	%pc@(L(kernel_end)),%a0
+	lea	PCREL32(L(kernel_end)),%a0
 	movel	%d0,%a0@
 
 	/* we have to return the first page at _stext since the init code
 	 * in mm/init.c simply expects kernel_pg_dir there, the rest of
 	 * page is used for further ptr tables in get_ptr_table.
 	 */
-	lea	%pc@(_stext),%a0
-	lea	%pc@(L(mmu_cached_pointer_tables)),%a1
+	lea	PCREL32(_stext),%a0
+	lea	PCREL32(L(mmu_cached_pointer_tables)),%a1
 	movel	%a0,%a1@
 	addl	#ROOT_TABLE_SIZE*4,%a1@
 
-	lea	%pc@(L(mmu_num_pointer_tables)),%a1
+	lea	PCREL32(L(mmu_num_pointer_tables)),%a1
 	addql	#1,%a1@
 
 	/* clear the page
@@ -2591,7 +2601,7 @@ func_start	mmu_get_root_table_entry,%d0/%a1
 	clrl	%a1@+
 	dbra	%d0,1b
 
-	lea	%pc@(L(kernel_pgdir_ptr)),%a1
+	lea	PCREL32(L(kernel_pgdir_ptr)),%a1
 	movel	%a0,%a1@
 
 	dputn	%a0
@@ -2625,13 +2635,13 @@ func_start	mmu_get_ptr_table_entry,%d0/%a1
 	/* Keep track of the number of pointer tables we use
 	 */
 	dputs	"\nmmu_get_new_ptr_table:"
-	lea	%pc@(L(mmu_num_pointer_tables)),%a0
+	lea	PCREL32(L(mmu_num_pointer_tables)),%a0
 	movel	%a0@,%d0
 	addql	#1,%a0@
 
 	/* See if there is a free pointer table in our cache of pointer tables
 	 */
-	lea	%pc@(L(mmu_cached_pointer_tables)),%a1
+	lea	PCREL32(L(mmu_cached_pointer_tables)),%a1
 	andw	#7,%d0
 	jne	1f
 
@@ -2733,7 +2743,7 @@ func_start	get_new_page,%d0/%a1
 
 	/* allocate the page and adjust memory_start
 	 */
-	lea	%pc@(L(memory_start)),%a0
+	lea	PCREL32(L(memory_start)),%a0
 	movel	%a0@,%a1
 	addl	#PAGESIZE,%a0@
 
@@ -2862,7 +2872,7 @@ func_start	serial_init,%d0/%d1/%a0/%a1
 #define SERIAL_CNTRL	CIABBASE+C_PRA
 
 	is_not_amiga(1f)
-	lea	%pc@(L(custom)),%a0
+	lea	PCREL32(L(custom)),%a0
 	movel	#-ZTWOBASE,%a0@
 	bclr	#SERIAL_DTR,SERIAL_CNTRL-ZTWOBASE
 	get_bi_record	BI_AMIGA_SERPER
@@ -2872,7 +2882,7 @@ func_start	serial_init,%d0/%d1/%a0/%a1
 #endif
 #ifdef CONFIG_ATARI
 	is_not_atari(4f)
-	movel	%pc@(L(iobase)),%a1
+	movel	PCREL32(L(iobase)),%a1
 #if defined(USE_PRINTER)
 	bclr	#0,%a1@(LSTMFP_IERB)
 	bclr	#0,%a1@(LSTMFP_DDR)
@@ -2886,7 +2896,7 @@ func_start	serial_init,%d0/%d1/%a0/%a1
 	moveb	%d0,%a1@(LPSG_WRITE)
 #elif defined(USE_SCC)
 	lea	%a1@(LSCC_CTRL),%a0
-	lea	%pc@(L(scc_initable)),%a1
+	lea	PCREL32(L(scc_initable)),%a1
 2:	moveb	%a1@+,%d0
 	jmi	3f
 	moveb	%d0,%a0@
@@ -2917,8 +2927,8 @@ func_start	serial_init,%d0/%d1/%a0/%a1
 
 #ifdef MAC_USE_SCC_A
 	/* Initialize channel A */
-	movel	%pc@(L(mac_sccbase)),%a0
-	lea	%pc@(L(scc_initable_mac)),%a1
+	movel	PCREL32(L(mac_sccbase)),%a0
+	lea	PCREL32(L(scc_initable_mac)),%a1
 5:	moveb	%a1@+,%d0
 	jmi	6f
 	moveb	%d0,%a0@(mac_scc_cha_a_ctrl_offset)
@@ -2930,9 +2940,9 @@ func_start	serial_init,%d0/%d1/%a0/%a1
 #ifdef MAC_USE_SCC_B
 	/* Initialize channel B */
 #ifndef MAC_USE_SCC_A	/* Load mac_sccbase only if needed */
-	movel	%pc@(L(mac_sccbase)),%a0
+	movel	PCREL32(L(mac_sccbase)),%a0
 #endif	/* MAC_USE_SCC_A */
-	lea	%pc@(L(scc_initable_mac)),%a1
+	lea	PCREL32(L(scc_initable_mac)),%a1
 7:	moveb	%a1@+,%d0
 	jmi	8f
 	moveb	%d0,%a0@(mac_scc_cha_b_ctrl_offset)
@@ -2950,7 +2960,7 @@ L(serial_init_not_mac):
 	is_not_q40(2f)
 /* debug output goes into SRAM, so we don't do it unless requested
    - check for '%LX$' signature in SRAM   */
-	lea	%pc@(q40_mem_cptr),%a1
+	lea	PCREL32(q40_mem_cptr),%a1
 	move.l	#0xff020010,%a1@  /* must be inited - also used by debug=mem */
 	move.l	#0xff020000,%a1
 	cmp.b	#'%',%a1@
@@ -2965,7 +2975,7 @@ L(serial_init_not_mac):
 	cmp.b	#'$',%a1@
 	bne	2f	/*nodbg*/
 	/* signature OK */
-	lea	%pc@(L(q40_do_debug)),%a1
+	lea	PCREL32(L(q40_do_debug)),%a1
 	tas	%a1@
 /*nodbg: q40_do_debug is 0 by default*/
 2:
@@ -2999,9 +3009,14 @@ func_start	serial_putc,%d0/%d1/%a0/%a1
 	is_not_amiga(2f)
 	andw	#0x00ff,%d0
 	oriw	#0x0100,%d0
-	movel	%pc@(L(custom)),%a0
+#if defined(CONFIG_M68000) || defined(CONFIG_M68010)
+	movew	%d0,(CUSTOMBASE+C_SERDAT)
+1:	movew	(CUSTOMBASE+C_SERDATR),%d0
+#else /* 68020 or higher */
+	movel	PCREL32(L(custom)),%a0
 	movew	%d0,%a0@(CUSTOMBASE+C_SERDAT)
 1:	movew	%a0@(CUSTOMBASE+C_SERDATR),%d0
+#endif /* 68020 or higher */
 	andw	#0x2000,%d0
 	jeq	1b
 	jra	L(serial_putc_done)
@@ -3014,7 +3029,7 @@ func_start	serial_putc,%d0/%d1/%a0/%a1
 #ifdef MAC_SERIAL_DEBUG
 
 #ifdef MAC_USE_SCC_A
-	movel	%pc@(L(mac_sccbase)),%a1
+	movel	PCREL32(L(mac_sccbase)),%a1
 3:	btst	#2,%a1@(mac_scc_cha_a_ctrl_offset)
 	jeq	3b
 	moveb	%d0,%a1@(mac_scc_cha_a_data_offset)
@@ -3022,7 +3037,7 @@ func_start	serial_putc,%d0/%d1/%a0/%a1
 
 #ifdef MAC_USE_SCC_B
 #ifndef MAC_USE_SCC_A	/* Load mac_sccbase only if needed */
-	movel	%pc@(L(mac_sccbase)),%a1
+	movel	PCREL32(L(mac_sccbase)),%a1
 #endif	/* MAC_USE_SCC_A */
 4:	btst	#2,%a1@(mac_scc_cha_b_ctrl_offset)
 	jeq	4b
@@ -3037,7 +3052,7 @@ func_start	serial_putc,%d0/%d1/%a0/%a1
 
 #ifdef CONFIG_ATARI
 	is_not_atari(4f)
-	movel	%pc@(L(iobase)),%a1
+	movel	PCREL32(L(iobase)),%a1
 #if defined(USE_PRINTER)
 3:	btst	#0,%a1@(LSTMFP_GPIP)
 	jne	3b
@@ -3153,9 +3168,9 @@ func_start	serial_putc,%d0/%d1/%a0/%a1
 
 #ifdef CONFIG_Q40
 	is_not_q40(2f)
-	tst.l	%pc@(L(q40_do_debug))	/* only debug if requested */
+	tst.l	PCREL32(L(q40_do_debug))	/* only debug if requested */
 	beq	2f
-	lea	%pc@(q40_mem_cptr),%a1
+	lea	PCREL32(q40_mem_cptr),%a1
 	move.l	%a1@,%a0
 	move.b	%d0,%a0@
 	addq.l	#4,%a0
@@ -3166,7 +3181,7 @@ func_start	serial_putc,%d0/%d1/%a0/%a1
 
 #ifdef CONFIG_APOLLO
 	is_not_apollo(2f)
-	movl    %pc@(L(iobase)),%a1
+	movl    PCREL32(L(iobase)),%a1
 	moveb	%d0,%a1@(LTHRB0)
 1:      moveb   %a1@(LSRB0),%d0
 	andb	#0x4,%d0
@@ -3177,9 +3192,9 @@ func_start	serial_putc,%d0/%d1/%a0/%a1
 
 #ifdef CONFIG_HP300
 	is_not_hp300(3f)
-	movl    %pc@(L(iobase)),%a1
-	addl	%pc@(L(uartbase)),%a1
-	movel	%pc@(L(uart_scode)),%d1	/* Check the scode */
+	movl    PCREL32(L(iobase)),%a1
+	addl	PCREL32(L(uartbase)),%a1
+	movel	PCREL32(L(uart_scode)),%d1	/* Check the scode */
 	jmi	3f			/* Unset? Exit */
 	cmpi	#256,%d1		/* APCI scode? */
 	jeq	2f
@@ -3283,13 +3298,13 @@ func_start	set_leds,%d0/%a0
 	movel	ARG1,%d0
 #ifdef CONFIG_HP300
 	is_not_hp300(1f)
-	movel	%pc@(L(iobase)),%a0
+	movel	PCREL32(L(iobase)),%a0
 	moveb	%d0,%a0@(0x1ffff)
 	jra	2f
 #endif
 1:
 #ifdef CONFIG_APOLLO
-	movel   %pc@(L(iobase)),%a0
+	movel   PCREL32(L(iobase)),%a0
 	lsll    #8,%d0
 	eorw    #0xff00,%d0
 	moveb	%d0,%a0@(LCPUCTRL)
@@ -3325,10 +3340,10 @@ func_start	console_init,%a0-%a4/%d0-%d7
 	 *		d6 = number of bytes on the entire screen
 	 */
 
-	lea	%pc@(L(console_globals)),%a2
-	movel	%pc@(L(mac_videobase)),%a1
-	movel	%pc@(L(mac_rowbytes)),%d5
-	movel	%pc@(L(mac_dimensions)),%d3	/* -> low byte */
+	lea	PCREL32(L(console_globals)),%a2
+	movel	PCREL32(L(mac_videobase)),%a1
+	movel	PCREL32(L(mac_rowbytes)),%d5
+	movel	PCREL32(L(mac_dimensions)),%d3	/* -> low byte */
 	movel	%d3,%d4
 	swap	%d4		/* -> high byte */
 	andl	#0xffff,%d3	/* d3 = screen width in pixels */
@@ -3349,13 +3364,13 @@ L(console_clear_loop):
 	/* Calculate font size */
 
 #if   defined(FONT_8x8) && defined(CONFIG_FONT_8x8)
-	lea	%pc@(font_vga_8x8),%a0
+	lea	PCREL32(font_vga_8x8),%a0
 #elif defined(FONT_8x16) && defined(CONFIG_FONT_8x16)
-	lea	%pc@(font_vga_8x16),%a0
+	lea	PCREL32(font_vga_8x16),%a0
 #elif defined(FONT_6x11) && defined(CONFIG_FONT_6x11)
-	lea	%pc@(font_vga_6x11),%a0
+	lea	PCREL32(font_vga_6x11),%a0
 #elif defined(CONFIG_FONT_8x8) /* default */
-	lea	%pc@(font_vga_8x8),%a0
+	lea	PCREL32(font_vga_8x8),%a0
 #else /* no compiled-in font */
 	lea	0,%a0
 #endif
@@ -3364,11 +3379,11 @@ L(console_clear_loop):
 	 *	At this point we make a shift in register usage
 	 *	a1 = address of console_font pointer
 	 */
-	lea	%pc@(L(console_font)),%a1
+	lea	PCREL32(L(console_font)),%a1
 	movel	%a0,%a1@	/* store pointer to struct fbcon_font_desc in console_font */
 	tstl	%a0
 	jeq	1f
-	lea	%pc@(L(console_font_data)),%a4
+	lea	PCREL32(L(console_font_data)),%a4
 	movel	%a0@(FONT_DESC_DATA),%d0
 	subl	#L(console_font),%a1
 	addl	%a1,%d0
@@ -3413,22 +3428,22 @@ func_start	console_put_stats,%a0/%d7
 
 #ifdef SERIAL_DEBUG
 	puts	" vidaddr:"
-	putn	%pc@(L(mac_videobase))		/* video addr. */
+	putn	PCREL32(L(mac_videobase))		/* video addr. */
 
 	puts	"\n  _stext:"
-	lea	%pc@(_stext),%a0
+	lea	PCREL32(_stext),%a0
 	putn	%a0
 
 	puts	"\nbootinfo:"
-	lea	%pc@(_end),%a0
+	lea	PCREL32(_end),%a0
 	putn	%a0
 
 	puts	"\ncpuid:"
-	putn	%pc@(L(cputype))
+	putn	PCREL32(L(cputype))
 	putc	'\n'
 
 #ifdef MAC_SERIAL_DEBUG
-	putn	%pc@(L(mac_sccbase))
+	putn	PCREL32(L(mac_sccbase))
 	putc	'\n'
 #endif
 #  if defined(MMU_PRINT)
@@ -3444,13 +3459,13 @@ func_start	console_put_penguin,%a0-%a1/%d0-%d7
 	 *	Get 'that_penguin' onto the screen in the upper right corner
 	 *	penguin is 64 x 74 pixels, align against right edge of screen
 	 */
-	lea	%pc@(L(mac_dimensions)),%a0
+	lea	PCREL32(L(mac_dimensions)),%a0
 	movel	%a0@,%d0
 	andil	#0xffff,%d0
 	subil	#64,%d0		/* snug up against the right edge */
 	clrl	%d1		/* start at the top */
 	movel	#73,%d7
-	lea	%pc@(L(that_penguin)),%a1
+	lea	PCREL32(L(that_penguin)),%a1
 L(console_penguin_row):
 	movel	#31,%d6
 L(console_penguin_pixel_pair):
@@ -3481,12 +3496,12 @@ L(that_penguin):
 	 */
 
 func_start	console_scroll,%a0-%a4/%d0-%d7
-	lea	%pc@(L(mac_videobase)),%a0
+	lea	PCREL32(L(mac_videobase)),%a0
 	movel	%a0@,%a1
 	movel	%a1,%a2
-	lea	%pc@(L(mac_rowbytes)),%a0
+	lea	PCREL32(L(mac_rowbytes)),%a0
 	movel	%a0@,%d5
-	movel	%pc@(L(console_font)),%a0
+	movel	PCREL32(L(console_font)),%a0
 	tstl	%a0
 	jeq	1f
 	mulul	%a0@(FONT_DESC_HEIGHT),%d5	/* account for # scan lines per character */
@@ -3495,7 +3510,7 @@ func_start	console_scroll,%a0-%a4/%d0-%d7
 	/*
 	 * Get dimensions
 	 */
-	lea	%pc@(L(mac_dimensions)),%a0
+	lea	PCREL32(L(mac_dimensions)),%a0
 	movel	%a0@,%d3
 	movel	%d3,%d4
 	swap	%d4
@@ -3505,9 +3520,9 @@ func_start	console_scroll,%a0-%a4/%d0-%d7
 	/*
 	 * Calculate number of bytes to move
 	 */
-	lea	%pc@(L(mac_rowbytes)),%a0
+	lea	PCREL32(L(mac_rowbytes)),%a0
 	movel	%a0@,%d6
-	movel	%pc@(L(console_font)),%a0
+	movel	PCREL32(L(console_font)),%a0
 	subl	%a0@(FONT_DESC_HEIGHT),%d4	/* we're not scrolling the top row! */
 	mulul	%d4,%d6		/* scan line bytes x num scan lines */
 	divul	#32,%d6		/* we'll move 8 longs at a time */
@@ -3524,9 +3539,9 @@ L(console_scroll_loop):
 	movel	%a2@+,%a1@+
 	dbra	%d6,L(console_scroll_loop)
 
-	lea	%pc@(L(mac_rowbytes)),%a0
+	lea	PCREL32(L(mac_rowbytes)),%a0
 	movel	%a0@,%d6
-	movel	%pc@(L(console_font)),%a0
+	movel	PCREL32(L(console_font)),%a0
 	mulul	%a0@(FONT_DESC_HEIGHT),%d6	/* scan line bytes x font height */
 	divul	#32,%d6			/* we'll move 8 words at a time */
 	subq	#1,%d6
@@ -3550,7 +3565,7 @@ func_return	console_scroll
 func_start	console_putc,%a0/%a1/%d0-%d7
 
 	is_not_mac(L(console_exit))
-	tstl	%pc@(L(console_font))
+	tstl	PCREL32(L(console_font))
 	jeq	L(console_exit)
 
 	/* Output character in d7 on console.
@@ -3562,7 +3577,7 @@ func_start	console_putc,%a0/%a1/%d0-%d7
 	/* A little safe recursion is good for the soul */
 	console_putc	#'\r'
 1:
-	lea	%pc@(L(console_globals)),%a0
+	lea	PCREL32(L(console_globals)),%a0
 
 	cmpib	#10,%d7
 	jne	L(console_not_lf)
@@ -3614,8 +3629,8 @@ L(console_not_home):
 	 *	At this point we make a shift in register usage
 	 *	a0 = address of pointer to font data (fbcon_font_desc)
 	 */
-	movel	%pc@(L(console_font)),%a0
-	movel	%pc@(L(console_font_data)),%a1	/* Load fbcon_font_desc.data into a1 */
+	movel	PCREL32(L(console_font)),%a0
+	movel	PCREL32(L(console_font_data)),%a1	/* Load fbcon_font_desc.data into a1 */
 	andl	#0x000000ff,%d7
 		/* ASSERT: a0 = contents of Lconsole_font */
 	mulul	%a0@(FONT_DESC_HEIGHT),%d7	/* d7 = index into font data */
@@ -3666,11 +3681,11 @@ func_return	console_putc
 	 */
 func_start	console_plot_pixel,%a0-%a1/%d0-%d4
 
-	movel	%pc@(L(mac_videobase)),%a1
-	movel	%pc@(L(mac_videodepth)),%d3
+	movel	PCREL32(L(mac_videobase)),%a1
+	movel	PCREL32(L(mac_videodepth)),%d3
 	movel	ARG1,%d0
 	movel	ARG2,%d1
-	mulul	%pc@(L(mac_rowbytes)),%d1
+	mulul	PCREL32(L(mac_rowbytes)),%d1
 	movel	ARG3,%d2
 
 	/*
@@ -3803,7 +3818,7 @@ L(showtest):
 	putn	%a0@
 
 	puts	"S="
-	lea	%pc@(L(mmu)),%a0
+	lea	PCREL32(L(mmu)),%a0
 	.long	0xf0106200		| pmove		%psr,%a0@
 	clrl	%d7
 	movew	%a0@,%d7
