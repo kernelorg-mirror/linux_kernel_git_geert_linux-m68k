@@ -231,6 +231,20 @@ config NFETH
 
 comment "Processor type"
 
+config M68000
+	bool "68000/68008 support"
+	depends on !MMU
+	help
+	  If you anticipate running this kernel on a computer with a MC68000
+	  or MC68008 processor, say Y. Otherwise, say N.
+
+config M68010
+	bool "68010/68012 support"
+	depends on !MMU
+	help
+	  If you anticipate running this kernel on a computer with a MC68010
+	  or MC68012 processor, say Y. Otherwise, say N.
+
 config M68020
 	bool "68020 support"
 	help
@@ -263,6 +277,13 @@ config M68060
 	  If you anticipate running this kernel on a computer with a MC68060
 	  processor, say Y. Otherwise, say N.
 
+config MCPU32
+	bool "CPU32 support"
+	depends on !MMU
+	help
+	  If you anticipate running this kernel on a computer with a Motorola
+	  CPU32 processor, say Y. Otherwise, say N.
+
 config MMU_MOTOROLA
 	bool
 
@@ -270,6 +291,17 @@ config MMU_SUN3
 	bool
 	depends on MMU && !MMU_MOTOROLA
 
+config NOMMU
+	bool
+	depends on !MMU
+	default y
+
+config FPU
+        bool "Support for floating point hardware"
+	default n if !MMU
+	---help---
+	  Enable FPU support
+ 
 config M68KFPU_EMU
 	bool "Math emulation support (EXPERIMENTAL)"
 	depends on EXPERIMENTAL
@@ -319,7 +351,7 @@ config ADVANCED
 
 config RMW_INSNS
 	bool "Use read-modify-write instructions"
-	depends on ADVANCED
+	depends on ADVANCED && !M68000 && !M68010 && !MCPU32
 	---help---
 	  This allows to use certain instructions that work with indivisible
 	  read-modify-write bus cycles. While this is faster than the
@@ -333,8 +365,8 @@ config RMW_INSNS
 	  adventurous.
 
 config SINGLE_MEMORY_CHUNK
-	bool "Use one physical chunk of memory only" if ADVANCED && !SUN3
-	default y if SUN3
+	bool "Use one physical chunk of memory only" if ADVANCED && !SUN3 && MMU
+	default y if SUN3 || !MMU
 	select NEED_MULTIPLE_NODES
 	help
 	  Ignore all but the first contiguous chunk of physical memory for VM

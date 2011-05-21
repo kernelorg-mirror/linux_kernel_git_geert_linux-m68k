@@ -4,7 +4,7 @@ config M68K
 	select HAVE_IDE
 	select HAVE_AOUT if MMU
 	select GENERIC_ATOMIC64 if MMU
-	select HAVE_GENERIC_HARDIRQS if !MMU
+	select HAVE_GENERIC_HARDIRQS if !MMU && !UAMIGA
 
 config RWSEM_GENERIC_SPINLOCK
 	bool
@@ -56,12 +56,15 @@ config MMU
 	  Select if you want MMU-based virtualised addressing space
 	  support by paged memory management. If unsure, say 'Y'.
 
+config UAMIGA
+	bool "Experimental uClinux on Amiga"
+
 menu "Platform dependent setup"
 
-if MMU
+if MMU || UAMIGA
 source arch/m68k/Kconfig.mmu
 endif
-if !MMU
+if !MMU && !UAMIGA
 source arch/m68k/Kconfig.nommu
 endif
 
