@@ -576,14 +576,14 @@ static u_short maxfmode, chipset;
 #define modx(x,v)	((v) & ((x)-1))
 
 /* if x1 is not a constant, this macro won't make real sense :-) */
-#ifdef __mc68000__
-#define DIVUL(x1, x2) ({int res; asm("divul %1,%2,%3": "=d" (res): \
-	"d" (x2), "d" ((long)((x1)/0x100000000ULL)), "0" ((long)(x1))); res;})
-#else
+#if !defined(__mc68000__) || defined(CONFIG_M68000) || defined(CONFIG_M68010)
 /* We know a bit about the numbers, so we can do it this way */
 #define DIVUL(x1, x2) ((((long)((unsigned long long)x1 >> 8) / x2) << 8) + \
 	((((long)((unsigned long long)x1 >> 8) % x2) << 8) / x2))
-#endif
+#else /* 68020 or higher */
+#define DIVUL(x1, x2) ({int res; asm("divul %1,%2,%3": "=d" (res): \
+	"d" (x2), "d" ((long)((x1)/0x100000000ULL)), "0" ((long)(x1))); res;})
+#endif /* 68020 or higher */
 
 #define highw(x)	((u_long)(x)>>16 & 0xffff)
 #define loww(x)		((u_long)(x) & 0xffff)
@@ -3350,12 +3350,13 @@ static int ami_get_var_cursorinfo(struct fb_var_cursorinfo *var, u_char __user *
 		for (width = (short)var->width-1; width >= 0; width--) {
 			if (bits == 0) {
 				bits = 16; --words;
-#ifdef __mc68000__
+#if !defined(__mc68000__) || defined(CONFIG_M68000) || defined(CONFIG_M68010)
+				datawords = (*(lspr+delta) << 16) | *lspr;
+				lspr++;
+#else /* 68020 or higher */
 				asm volatile ("movew %1@(%3:w:2),%0 ; swap %0 ; movew %1@+,%0"
 					: "=d" (datawords), "=a" (lspr) : "1" (lspr), "d" (delta));
-#else
-				datawords = (*(lspr+delta) << 16) | (*lspr++);
-#endif
+#endif /* 68020 or higher */
 			}
 			--bits;
 #ifdef __mc68000__
@@ -3375,17 +3376,17 @@ static int ami_get_var_cursorinfo(struct fb_var_cursorinfo *var, u_char __user *
 		}
 		while (--words >= 0)
 			++lspr;
-#ifdef __mc68000__
-		asm volatile ("lea %0@(%4:w:2),%0 ; tstl %1 ; jeq 1f ; exg %0,%1\n1:"
-			: "=a" (lspr), "=a" (sspr) : "0" (lspr), "1" (sspr), "d" (delta));
-#else
+#if !defined(__mc68000__) || defined(CONFIG_M68000) || defined(CONFIG_M68010)
 		lspr += delta;
 		if (sspr) {
 			u_short *tmp = lspr;
 			lspr = sspr;
 			sspr = tmp;
 		}
-#endif
+#else /* 68020 or higher */
+		asm volatile ("lea %0@(%4:w:2),%0 ; tstl %1 ; jeq 1f ; exg %0,%1\n1:"
+			: "=a" (lspr), "=a" (sspr) : "0" (lspr), "1" (sspr), "d" (delta));
+#endif /* 68020 or higher */
 	}
 	return 0;
 }
@@ -3453,47 +3454,47 @@ static int ami_set_var_cursorinfo(struct fb_var_cursorinfo *var, u_char __user *
 #endif
 			if (--bits == 0) {
 				bits = 16; --words;
-#ifdef __mc68000__
-				asm volatile ("swap %2 ; movew %2,%0@(%3:w:2) ; swap %2 ; movew %2,%0@+"
-					: "=a" (lspr) : "0" (lspr), "d" (datawords), "d" (delta));
-#else
+#if !defined(__mc68000__) || defined(CONFIG_M68000) || defined(CONFIG_M68010)
 				*(lspr+delta) = (u_short) (datawords >> 16);
 				*lspr++ = (u_short) (datawords & 0xffff);
-#endif
+#else /* 68020 or higher */
+				asm volatile ("swap %2 ; movew %2,%0@(%3:w:2) ; swap %2 ; movew %2,%0@+"
+					: "=a" (lspr) : "0" (lspr), "d" (datawords), "d" (delta));
+#endif /* 68020 or higher */
 			}
 		}
 		if (bits < 16) {
 			--words;
-#ifdef __mc68000__
+#if !defined(__mc68000__) || defined(CONFIG_M68000) || defined(CONFIG_M68010)
+			*(lspr+delta) = (u_short) (datawords >> (16+bits));
+			*lspr++ = (u_short) ((datawords & 0x0000ffff) >> bits);
+#else /* 68020 or higher */
 			asm volatile (
 				"swap %2 ; lslw %4,%2 ; movew %2,%0@(%3:w:2) ; "
 				"swap %2 ; lslw %4,%2 ; movew %2,%0@+"
 				: "=a" (lspr) : "0" (lspr), "d" (datawords), "d" (delta), "d" (bits));
-#else
-			*(lspr+delta) = (u_short) (datawords >> (16+bits));
-			*lspr++ = (u_short) ((datawords & 0x0000ffff) >> bits);
-#endif
+#endif /* 68020 or higher */
 		}
 		while (--words >= 0) {
-#ifdef __mc68000__
-			asm volatile ("moveql #0,%%d0 ; movew %%d0,%0@(%2:w:2) ; movew %%d0,%0@+"
-				: "=a" (lspr) : "0" (lspr), "d" (delta) : "d0");
-#else
+#if !defined(__mc68000__) || defined(CONFIG_M68000) || defined(CONFIG_M68010)
 			*(lspr+delta) = 0;
 			*lspr++ = 0;
-#endif
+#else /* 68020 or higher */
+			asm volatile ("moveql #0,%%d0 ; movew %%d0,%0@(%2:w:2) ; movew %%d0,%0@+"
+				: "=a" (lspr) : "0" (lspr), "d" (delta) : "d0");
+#endif /* 68020 or higher */
 		}
-#ifdef __mc68000__
-		asm volatile ("lea %0@(%4:w:2),%0 ; tstl %1 ; jeq 1f ; exg %0,%1\n1:"
-			: "=a" (lspr), "=a" (sspr) : "0" (lspr), "1" (sspr), "d" (delta));
-#else
+#if !defined(__mc68000__) || defined(CONFIG_M68000) || defined(CONFIG_M68010)
 		lspr += delta;
 		if (sspr) {
 			u_short *tmp = lspr;
 			lspr = sspr;
 			sspr = tmp;
 		}
-#endif
+#else /* 68020 or higher */
+		asm volatile ("lea %0@(%4:w:2),%0 ; tstl %1 ; jeq 1f ; exg %0,%1\n1:"
+			: "=a" (lspr), "=a" (sspr) : "0" (lspr), "1" (sspr), "d" (delta));
+#endif /* 68020 or higher */
 	}
 	par->crsr.height = var->height;
 	par->crsr.width = var->width;
