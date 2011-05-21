@@ -335,6 +335,15 @@ config M68KFPU_EMU_ONLY
 	  needs to be executed whether a floating-point instruction in the
 	  kernel should be executed or not.
 
+config RAMBASE
+	hex "Kernel load address" if !MMU
+	default 0x00000000 if MMU_MOTOROLA
+	default 0x00E00000 if MMU_SUN3
+	---help---
+	  This is the memory address to load the kernel at. It depends on your
+	  actual hardware configuration. E.g. for an Amiga with Zorro II RAM,
+	  it should be 0x00200000.
+
 config ADVANCED
 	bool "Advanced configuration options"
 	---help---

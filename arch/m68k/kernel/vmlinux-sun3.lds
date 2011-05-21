@@ -10,7 +10,7 @@ ENTRY(_start)
 jiffies = jiffies_64 + 4;
 SECTIONS
 {
-  . = 0xE002000;
+  . = CONFIG_RAMBASE + 0x2000;
   _text = .;			/* Text and read-only data */
   .text : {
 	HEAD_TEXT
