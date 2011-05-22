@@ -43,12 +43,54 @@
 asmlinkage void system_call(void);
 asmlinkage void buserr(void);
 asmlinkage void trap(void);
+
+#ifdef CONFIG_M68000
+
+    /*
+     *  The 68000 doesn't store the format and vector number in the stack
+     *  frame automatically, so we have to use a different routine for each
+     *  vector
+     */
+#define E_VEC_NUM		64
+asmlinkage void addrerr(void);
+asmlinkage void trap_10(void);
+asmlinkage void trap_14(void);
+asmlinkage void trap_18(void);
+asmlinkage void trap_1c(void);
+asmlinkage void trap_20(void);
+asmlinkage void trap_24(void);
+asmlinkage void trap_28(void);
+asmlinkage void trap_2c(void);
+asmlinkage void trap_30(void);
+asmlinkage void trap_34(void);
+asmlinkage void trap_38(void);
+asmlinkage void trap_3c(void);
+
+#else /* 68010 or higher */
+
+#define e_vectors		vectors
+#define E_VEC_NUM		256
+#define addrerr			trap
+#define trap_10			trap
+#define trap_14			trap
+#define trap_18			trap
+#define trap_1c			trap
+#define trap_20			trap
+#define trap_24			trap
+#define trap_28			trap
+#define trap_2c			trap
+#define trap_30			trap
+#define trap_34			trap
+#define trap_38			trap
+#define trap_3c			trap
+
+#endif /* 68010 or higher */
 asmlinkage void nmihandler(void);
 #ifdef CONFIG_M68KFPU_EMU
 asmlinkage void fpu_emu(void);
 #endif
 
-e_vector vectors[256];
+e_vector e_vectors[E_VEC_NUM];
 
 /* nmi handler for the Amiga */
 asm(".text\n"
@@ -68,8 +110,12 @@ void __init base_trap_init(void)
 		__asm__ volatile ("movec %%vbr, %0" : "=r" (sun3x_prom_vbr));
 	}
 
-	/* setup the exception vector table */
-	__asm__ volatile ("movec %0,%%vbr" : : "r" ((void*)vectors));
+#ifndef CPU_M68000_ONLY
+	if (!CPU_IS_000) {
+		/* setup the exception vector table */
+		__asm__ volatile ("movec %0,%%vbr" : : "r" ((void*)vectors));
+	}
+#endif /* !CPU_M68000_ONLY */
 
 	if (CPU_IS_060) {
 		/* set up ISP entry points */
@@ -79,7 +125,7 @@ void __init base_trap_init(void)
 	}
 
 	vectors[VEC_BUSERR] = buserr;
-	vectors[VEC_ILLEGAL] = trap;
+	vectors[VEC_ILLEGAL] = trap_10;
 	vectors[VEC_SYS] = system_call;
 }
 
@@ -89,6 +135,22 @@ void __init trap_init (void)
 
 	for (i = VEC_SPUR; i <= VEC_INT7; i++)
 		vectors[i] = bad_inthandler;
+
+#ifdef CONFIG_M68000
+	vectors[VEC_ADDRERR]	= addrerr;
+	vectors[VEC_ILLEGAL]	= trap_10;
+	vectors[VEC_ZERODIV]	= trap_14;
+	vectors[VEC_CHK]	= trap_18;
+	vectors[VEC_TRAP]	= trap_1c;
+	vectors[VEC_PRIV]	= trap_20;
+	vectors[VEC_TRACE]	= trap_24;
+	vectors[VEC_LINE10]	= trap_28;
+	vectors[VEC_LINE11]	= trap_2c;
+	vectors[VEC_RESV12]	= trap_30;
+	vectors[VEC_COPROC]	= trap_34;
+	vectors[VEC_FORMAT]	= trap_38;
+	vectors[VEC_UNINT]	= trap_3c;
+#endif /* CONFIG_M68000 */
 
 	for (i = 0; i < VEC_USER; i++)
 		if (!vectors[i])

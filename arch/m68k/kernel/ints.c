@@ -333,7 +333,33 @@ EXPORT_SYMBOL(disable_irq_nosync);
 int m68k_irq_startup(unsigned int irq)
 {
 	if (irq <= IRQ_AUTO_7)
+#ifdef CONFIG_M68000
+		switch (irq) {
+		case IRQ_AUTO_1:
+			vectors[VEC_INT1] = auto1_inthandler;
+			break;
+		case IRQ_AUTO_2:
+			vectors[VEC_INT2] = auto2_inthandler;
+			break;
+		case IRQ_AUTO_3:
+			vectors[VEC_INT3] = auto3_inthandler;
+			break;
+		case IRQ_AUTO_4:
+			vectors[VEC_INT4] = auto4_inthandler;
+			break;
+		case IRQ_AUTO_5:
+			vectors[VEC_INT5] = auto5_inthandler;
+			break;
+		case IRQ_AUTO_6:
+			vectors[VEC_INT6] = auto6_inthandler;
+			break;
+		case IRQ_AUTO_7:
+			vectors[VEC_INT7] = auto7_inthandler;
+			break;
+		}
+#else
 		vectors[VEC_SPUR + irq] = auto_inthandler;
+#endif
 	else
 		vectors[m68k_first_user_vec + irq - IRQ_USER] = user_inthandler;
 	return 0;

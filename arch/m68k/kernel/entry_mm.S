@@ -50,20 +50,47 @@
 .globl auto_irqhandler_fixup
 .globl user_irqvec_fixup, user_irqhandler_fixup
 
+#ifdef CONFIG_M68000
+.globl addrerr
+.globl trap_10, trap_14, trap_18, trap_1c, trap_20, trap_24, trap_28, trap_2c
+.globl trap_30, trap_34, trap_38, trap_3c
+.globl auto1_inthandler, auto2_inthandler, auto3_inthandler, auto4_inthandler
+.globl auto5_inthandler, auto6_inthandler, auto7_inthandler
+#else /* 68010 or higher */
+.globl trap
+#endif /* 68010 or higher */
+
 .text
 ENTRY(buserr)
+#ifdef CONFIG_M68000
+ENTRY(addrerr)
+#endif
 	SAVE_ALL_INT
 	GET_CURRENT(%d0)
 	movel	%sp,%sp@-		| stack frame pointer argument
-	bsrl	buserr_c
+	jbsr	buserr_c
 	addql	#4,%sp
 	jra	.Lret_from_exception
 
 ENTRY(trap)
+#ifdef CONFIG_M68000
+ENTRY(trap_10)
+ENTRY(trap_14)
+ENTRY(trap_18)
+ENTRY(trap_1c)
+ENTRY(trap_20)
+ENTRY(trap_24)
+ENTRY(trap_28)
+ENTRY(trap_2c)
+ENTRY(trap_30)
+ENTRY(trap_34)
+ENTRY(trap_38)
+ENTRY(trap_3c)
+#endif
 	SAVE_ALL_INT
 	GET_CURRENT(%d0)
 	movel	%sp,%sp@-		| stack frame pointer argument
-	bsrl	trap_c
+	jbsr	trap_c
 	addql	#4,%sp
 	jra	.Lret_from_exception
 
@@ -129,7 +156,14 @@ ENTRY(system_call)
 	cmpl	#NR_syscalls,%d0
 	jcc	badsys
 syscall:
+#if defined(CONFIG_M68000) || defined(CONFIG_M68010)
+	lsll	#2,%d0
+	leal	sys_call_table,%a0
+	movel	(%a0,%d0:l),%a0
+	jbsr	(%a0)
+#else /* 68020 or higher */
 	jbsr	@(sys_call_table,%d0:l:4)@(0)
+#endif /* 68020 or higher */
 	movel	%d0,%sp@(PT_OFF_D0)	| save the return value
 ret_from_syscall:
 	|oriw	#0x0700,%sr
@@ -177,7 +211,7 @@ do_signal_return:
 	subql	#4,%sp			| dummy return address
 	SAVE_SWITCH_STACK
 	pea	%sp@(SWITCH_STACK_SIZE)
-	bsrl	do_signal
+	jbsr	do_signal
 	addql	#4,%sp
 	RESTORE_SWITCH_STACK
 	addql	#4,%sp
@@ -196,6 +230,87 @@ do_delayed_trace:
 
 /* This is the main interrupt handler for autovector interrupts */
 
+#ifdef CONFIG_M68000
+
+ENTRY(auto1_inthandler)
+	SAVE_ALL_INT
+	GET_CURRENT(%d0)
+	addqb	#1,%curptr@(TASK_INFO+TINFO_PREEMPT+1)
+					|  put exception # in d0
+	movel	%sp,%sp@-
+	movel	#25,%sp@-		|  put vector # on stack
+	jsr	__m68k_handle_int	|  process the IRQ
+	addql	#8,%sp			|  pop parameters off stack
+	bra	ret_from_interrupt
+
+ENTRY(auto2_inthandler)
+	SAVE_ALL_INT
+	GET_CURRENT(%d0)
+	addqb	#1,%curptr@(TASK_INFO+TINFO_PREEMPT+1)
+					|  put exception # in d0
+	movel	%sp,%sp@-
+	movel	#26,%sp@-		|  put vector # on stack
+	jsr	__m68k_handle_int	|  process the IRQ
+	addql	#8,%sp			|  pop parameters off stack
+	bra	ret_from_interrupt
+
+ENTRY(auto3_inthandler)
+	SAVE_ALL_INT
+	GET_CURRENT(%d0)
+	addqb	#1,%curptr@(TASK_INFO+TINFO_PREEMPT+1)
+					|  put exception # in d0
+	movel	%sp,%sp@-
+	movel	#27,%sp@-		|  put vector # on stack
+	jsr	__m68k_handle_int	|  process the IRQ
+	addql	#8,%sp			|  pop parameters off stack
+	bra	ret_from_interrupt
+
+ENTRY(auto4_inthandler)
+	SAVE_ALL_INT
+	GET_CURRENT(%d0)
+	addqb	#1,%curptr@(TASK_INFO+TINFO_PREEMPT+1)
+					|  put exception # in d0
+	movel	%sp,%sp@-
+	movel	#28,%sp@-		|  put vector # on stack
+	jsr	__m68k_handle_int	|  process the IRQ
+	addql	#8,%sp			|  pop parameters off stack
+	bra	ret_from_interrupt
+
+ENTRY(auto5_inthandler)
+	SAVE_ALL_INT
+	GET_CURRENT(%d0)
+	addqb	#1,%curptr@(TASK_INFO+TINFO_PREEMPT+1)
+					|  put exception # in d0
+	movel	%sp,%sp@-
+	movel	#29,%sp@-		|  put vector # on stack
+	jsr	__m68k_handle_int	|  process the IRQ
+	addql	#8,%sp			|  pop parameters off stack
+	bra	ret_from_interrupt
+
+ENTRY(auto6_inthandler)
+	SAVE_ALL_INT
+	GET_CURRENT(%d0)
+	addqb	#1,%curptr@(TASK_INFO+TINFO_PREEMPT+1)
+					|  put exception # in d0
+	movel	%sp,%sp@-
+	movel	#30,%sp@-		|  put vector # on stack
+	jsr	__m68k_handle_int	|  process the IRQ
+	addql	#8,%sp			|  pop parameters off stack
+	bra	ret_from_interrupt
+
+ENTRY(auto7_inthandler)
+	SAVE_ALL_INT
+	GET_CURRENT(%d0)
+	addqb	#1,%curptr@(TASK_INFO+TINFO_PREEMPT+1)
+					|  put exception # in d0
+	movel	%sp,%sp@-
+	movel	#31,%sp@-		|  put vector # on stack
+	jsr	__m68k_handle_int	|  process the IRQ
+	addql	#8,%sp			|  pop parameters off stack
+	bra	ret_from_interrupt
+
+#else /* !CONFIG_M68000 */
+
 ENTRY(auto_inthandler)
 	SAVE_ALL_INT
 	GET_CURRENT(%d0)
@@ -209,6 +324,8 @@ ENTRY(auto_inthandler)
 auto_irqhandler_fixup = . + 2
 	jsr	__m68k_handle_int	|  process the IRQ
 	addql	#8,%sp			|  pop parameters off stack
+
+#endif /* !CONFIG_M68000 */
 
 ret_from_interrupt:
 	subqb	#1,%curptr@(TASK_INFO+TINFO_PREEMPT+1)
@@ -234,7 +351,13 @@ ENTRY(user_inthandler)
 	GET_CURRENT(%d0)
 	addqb	#1,%curptr@(TASK_INFO+TINFO_PREEMPT+1)
 					|  put exception # in d0
+#if defined(CONFIG_M68000) || defined(CONFIG_M68010)
+	movel	%sp@(PT_OFF_FORMATVEC),%d0
+	lsr	#4,%d0
+	and	#0x3ff,%d0
+#else /* 68020 or higher */
 	bfextu	%sp@(PT_OFF_FORMATVEC){#4,#10},%d0
+#endif /* 68020 or higher */
 user_irqvec_fixup = . + 2
 	subw	#VEC_USER,%d0
 
