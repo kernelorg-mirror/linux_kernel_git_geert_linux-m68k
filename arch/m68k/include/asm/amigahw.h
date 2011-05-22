@@ -264,7 +264,11 @@ struct CIA {
     unsigned char crb;		char pade[0xff];
 };
 
+#ifdef CONFIG_MMU
 #define zTwoBase (0x80000000)
+#else
+#define zTwoBase (0)
+#endif
 #define ZTWO_PADDR(x) (((unsigned long)(x))-zTwoBase)
 #define ZTWO_VADDR(x) (((unsigned long)(x))+zTwoBase)
 
