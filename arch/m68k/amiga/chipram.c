@@ -33,10 +33,14 @@ void __init amiga_chip_init(void)
     if (!AMIGAHW_PRESENT(CHIP_RAM))
 	return;
 
+#ifdef CONFIG_M68000
+    /* On 68000, the exception table is at address zero */
+    chipram_res.start += 0x400;
+#endif
     chipram_res.end = CHIP_PHYSADDR + amiga_chip_size - 1;
     request_resource(&iomem_resource, &chipram_res);
 
-    chipavail = amiga_chip_size;
+    chipavail = resource_size(&chipram_res);
 }
 
 
