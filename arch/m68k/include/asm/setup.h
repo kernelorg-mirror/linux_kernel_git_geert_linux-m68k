@@ -212,10 +212,14 @@ extern unsigned long m68k_machtype;
 #define CPUB_68040     2
 #define CPUB_68060     3
 
+#define CPUB_68010	6	/* FIXME m68kboot-uC */
+
+#define CPU_68000	(0)
 #define CPU_68020      (1<<CPUB_68020)
 #define CPU_68030      (1<<CPUB_68030)
 #define CPU_68040      (1<<CPUB_68040)
 #define CPU_68060      (1<<CPUB_68060)
+#define CPU_68010	(1<<CPUB_68010)
 
 #define FPUB_68881     0
 #define FPUB_68882     1
@@ -260,6 +264,26 @@ extern unsigned long vme_brdtype;
 
 extern int m68k_is040or060;
 #endif /* !__ASSEMBLY__ */
+
+#if defined(CONFIG_M68000) || defined(CONFIG_M68010)
+
+/* FIXME */
+#define CPU_IS_000		(1)
+#define CPU_IS_020		(0)
+#define CPU_IS_030		(0)
+#define CPU_IS_040		(0)
+#define CPU_IS_060		(0)
+#define CPU_IS_020_OR_030	(0)
+#define CPU_IS_040_OR_060	(0)
+#define MMU_IS_SUN3		(0)
+#define MMU_IS_851		(0)
+#define MMU_IS_030		(0)
+#define MMU_IS_040		(0)
+#define MMU_IS_060		(0)
+
+#else /* 68020 or higher */
+
+#define CPU_IS_000		(0)
 
 #if !defined(CONFIG_M68020)
 #  define CPU_IS_020 (0)
@@ -340,6 +364,8 @@ extern int m68k_is040or060;
 #    define CPU_IS_040_OR_060 (1)
 #  endif
 #endif
+
+#endif /* 68020 or higher */
 
 #define CPU_TYPE (m68k_cputype)
 
