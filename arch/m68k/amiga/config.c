@@ -516,6 +516,7 @@ static NORET_TYPE void amiga_reset(void)
 
 static void amiga_reset(void)
 {
+#ifdef CONFIG_MMU
 	unsigned long jmp_addr040 = virt_to_phys(&&jmp_addr_label040);
 	unsigned long jmp_addr = virt_to_phys(&&jmp_addr_label);
 
@@ -559,6 +560,7 @@ jmp_addr_label040:
 		: "d0");
 
 	jmp_addr_label:
+#endif /* CONFIG_MMU */
 	/* pickup reset address from AmigaOS ROM, reset devices and jump
 	 * to reset address
 	 */
