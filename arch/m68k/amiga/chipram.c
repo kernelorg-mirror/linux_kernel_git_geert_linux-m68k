@@ -33,7 +33,7 @@ void __init amiga_chip_init(void)
     if (!AMIGAHW_PRESENT(CHIP_RAM))
 	return;
 
-    chipram_res.end = amiga_chip_size-1;
+    chipram_res.end = CHIP_PHYSADDR + amiga_chip_size - 1;
     request_resource(&iomem_resource, &chipram_res);
 
     chipavail = amiga_chip_size;
