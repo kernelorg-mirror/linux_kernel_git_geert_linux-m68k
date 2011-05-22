@@ -14,7 +14,9 @@
 #
 
 # override top level makefile
-AS += -m68020
+ifdef CONFIG_NOMMU
+KBUILD_CFLAGS += -DUTS_SYSNAME=\"uClinux\" -D__uClinux__
+endif
 LDFLAGS := -m m68kelf
 KBUILD_LDFLAGS_MODULE += -T $(srctree)/arch/m68k/kernel/module.lds
 ifneq ($(SUBARCH),$(ARCH))
@@ -33,6 +35,15 @@ CHECKFLAGS += -D__mc68000__
 # without -fno-strength-reduce the 53c7xx.c driver fails ;-(
 KBUILD_CFLAGS += -pipe -fno-strength-reduce -ffixed-a2
 
+ifdef CONFIG_M68000
+KBUILD_CFLAGS += -m68000 -Wa,-m68000
+AS += -m68000 -Wa,-m68000
+else
+ifdef CONFIG_M68010
+KBUILD_CFLAGS += -m68010 -Wa,-m68010
+AS += -m68010 -Wa,-m68010
+else # 68020 or higher
+AS += -m68020
 # enable processor switch if compiled only for a single cpu
 ifndef CONFIG_M68020
 ifndef CONFIG_M68030
@@ -45,6 +56,8 @@ ifndef CONFIG_M68040
 KBUILD_CFLAGS += -m68060
 endif
 
+endif
+endif
 endif
 endif
 
