@@ -1,4 +1,4 @@
-#ifdef CONFIG_MMU
+#if defined(CONFIG_MMU) || defined(CONFIG_UAMIGA)
 #include "setup_mm.c"
 #else
 #include "setup_no.c"

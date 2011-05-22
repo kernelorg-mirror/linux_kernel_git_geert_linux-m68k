@@ -25,7 +25,7 @@
 #define NR_IRQS	0
 #endif
 
-#ifdef CONFIG_MMU
+#if defined(CONFIG_MMU) || defined(CONFIG_UAMIGA)
 
 #include <linux/linkage.h>
 #include <linux/hardirq.h>
