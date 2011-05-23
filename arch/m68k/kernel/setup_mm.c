@@ -44,7 +44,7 @@
 #endif
 #include <asm/natfeat.h>
 
-#if !FPSTATESIZE || !NR_IRQS
+#if (defined(CONFIG_FPU) && !FPSTATESIZE) || !NR_IRQS
 #warning No CPU/platform type selected, your kernel will not work!
 #warning Are you building an allnoconfig kernel?
 #endif
@@ -231,7 +231,7 @@ void __init setup_arch(char **cmdline_p)
 	 * We should really do our own FPU check at startup.
 	 * [what do we do with buggy 68LC040s? if we have problems
 	 *  with them, we should add a test to check_bugs() below] */
-#ifndef CONFIG_M68KFPU_EMU_ONLY
+#if !defined(CONFIG_M68KFPU_EMU_ONLY) && defined(CONFIG_FPU)
 	/* clear the fpu if we have one */
 	if (m68k_fputype & (FPU_68881|FPU_68882|FPU_68040|FPU_68060)) {
 		volatile int zero = 0;
@@ -517,7 +517,7 @@ module_init(proc_hardware_init);
 
 void check_bugs(void)
 {
-#ifndef CONFIG_M68KFPU_EMU
+#if !defined(CONFIG_M68KFPU_EMU) && defined(CONFIG_FPU)
 	if (m68k_fputype == 0) {
 		printk(KERN_EMERG "*** YOU DO NOT HAVE A FLOATING POINT UNIT, "
 			"WHICH IS REQUIRED BY LINUX/M68K ***\n");
@@ -525,7 +525,7 @@ void check_bugs(void)
 			"emulation project\n");
 		panic("no FPU");
 	}
-#endif /* !CONFIG_M68KFPU_EMU */
+#endif /* !CONFIG_M68KFPU_EMU && CONFIG_FPU */
 }
 
 #ifdef CONFIG_ADB

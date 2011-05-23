@@ -36,9 +36,11 @@ int main(void)
 	DEFINE(THREAD_FS, offsetof(struct thread_struct, fs));
 	DEFINE(THREAD_CRP, offsetof(struct thread_struct, crp));
 	DEFINE(THREAD_ESP0, offsetof(struct thread_struct, esp0));
+#ifdef CONFIG_FPU
 	DEFINE(THREAD_FPREG, offsetof(struct thread_struct, fp));
 	DEFINE(THREAD_FPCNTL, offsetof(struct thread_struct, fpcntl));
 	DEFINE(THREAD_FPSTATE, offsetof(struct thread_struct, fpstate));
+#endif
 
 	/* offsets into the thread_info struct */
 	DEFINE(TINFO_PREEMPT, offsetof(struct thread_info, preempt_count));
