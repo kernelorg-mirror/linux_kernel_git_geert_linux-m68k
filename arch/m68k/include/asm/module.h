@@ -1,7 +1,7 @@
 #ifndef _ASM_M68K_MODULE_H
 #define _ASM_M68K_MODULE_H
 
-#ifdef CONFIG_MMU
+#if defined(CONFIG_MMU) || defined(CONFIG_UAMIGA)
 
 struct mod_arch_specific {
 	struct m68k_fixup_info *fixup_start, *fixup_end;

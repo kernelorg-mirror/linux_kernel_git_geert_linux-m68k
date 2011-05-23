@@ -8,13 +8,13 @@ struct sigcontext {
 	unsigned long  sc_d1;
 	unsigned long  sc_a0;
 	unsigned long  sc_a1;
-#ifdef __uClinux__
+#if defined(__uClinux__) && !defined(CONFIG_UAMIGA)
 	unsigned long  sc_a5;
 #endif
 	unsigned short sc_sr;
 	unsigned long  sc_pc;
 	unsigned short sc_formatvec;
-#ifndef __uClinux__
+#if !defined(__uClinux__) || defined(CONFIG_UAMIGA)
 # ifdef __mcoldfire__
 	unsigned long  sc_fpregs[2][2];	/* room for two fp registers */
 # else

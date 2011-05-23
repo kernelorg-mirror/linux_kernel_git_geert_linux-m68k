@@ -38,7 +38,7 @@ typedef struct page *pgtable_t;
 
 #endif /* !__ASSEMBLY__ */
 
-#ifdef CONFIG_MMU
+#if defined(CONFIG_MMU) || defined(CONFIG_UAMIGA)
 #include "page_mm.h"
 #else
 #include "page_no.h"

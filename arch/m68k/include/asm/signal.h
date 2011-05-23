@@ -150,7 +150,7 @@ typedef struct sigaltstack {
 #ifdef __KERNEL__
 #include <asm/sigcontext.h>
 
-#ifndef __uClinux__
+#if !defined(__uClinux__) || defined(CONFIG_UAMIGA)
 #define __HAVE_ARCH_SIG_BITOPS
 
 static inline void sigaddset(sigset_t *set, int _sig)

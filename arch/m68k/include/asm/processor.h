@@ -98,7 +98,7 @@ struct thread_struct {
 	.info	= INIT_THREAD_INFO(init_task),				\
 }
 
-#ifdef CONFIG_MMU
+#if defined(CONFIG_MMU) || defined(CONFIG_UAMIGA)
 /*
  * Do necessary setup to start up a newly executed thread.
  */
