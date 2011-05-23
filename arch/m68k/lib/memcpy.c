@@ -34,8 +34,10 @@ void *memcpy(void *to, const void *from, size_t n)
 	if (temp) {
 		long *lto = to;
 		const long *lfrom = from;
-#if defined(__mc68020__) || defined(__mc68030__) || \
-    defined(__mc68040__) || defined(__mc68060__)
+#if (defined(CONFIG_M68020) || defined(CONFIG_M68030) || \
+     defined(CONFIG_M68040) || defined(CONFIG_M68060) || \
+     defined(CONFIG_MCPU32)) && \
+    !(defined(CONFIG_M68000) || defined(CONFIG_M68010))
 		asm volatile (
 			"	movel %2,%3\n"
 			"	andw  #7,%3\n"

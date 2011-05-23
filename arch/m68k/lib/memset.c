@@ -32,8 +32,10 @@ void *memset(void *s, int c, size_t count)
 	temp = count >> 2;
 	if (temp) {
 		long *ls = s;
-#if defined(__mc68020__) || defined(__mc68030__) || \
-    defined(__mc68040__) || defined(__mc68060__)
+#if (defined(CONFIG_M68020) || defined(CONFIG_M68030) || \
+     defined(CONFIG_M68040) || defined(CONFIG_M68060) || \
+     defined(CONFIG_MCPU32)) && \
+    !(defined(CONFIG_M68000) || defined(CONFIG_M68010))
 		size_t temp1;
 		asm volatile (
 			"	movel %1,%2\n"

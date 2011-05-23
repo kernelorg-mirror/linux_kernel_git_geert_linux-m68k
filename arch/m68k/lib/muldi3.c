@@ -19,8 +19,10 @@ along with GNU CC; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#if defined(__mc68020__) || defined(__mc68030__) || \
-    defined(__mc68040__) || defined(__mc68060__)
+#if (defined(CONFIG_M68020) || defined(CONFIG_M68030) || \
+     defined(CONFIG_M68040) || defined(CONFIG_M68060) || \
+     defined(CONFIG_MCPU32)) && \
+    !(defined(CONFIG_M68000) || defined(CONFIG_M68010))
 
 #define umul_ppmm(w1, w0, u, v) \
   __asm__ ("mulu%.l %3,%1:%0"						\
