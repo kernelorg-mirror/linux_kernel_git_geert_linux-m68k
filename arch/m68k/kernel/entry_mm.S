@@ -433,6 +433,7 @@ resume:
 	/* save sr */
 	movew	%sr,%a0@(TASK_THREAD+THREAD_SR)
 
+#ifdef CONFIG_MMU
 	/* save fs (sfc,%dfc) (may be pointing to kernel memory) */
 	movec	%sfc,%d0
 	movew	%d0,%a0@(TASK_THREAD+THREAD_FS)
@@ -441,7 +442,13 @@ resume:
 	/* it is better to use a movel here instead of a movew 8*) */
 	movec	%usp,%d0
 	movel	%d0,%a0@(TASK_THREAD+THREAD_USP)
-
+#else /* !CONFIG_MMU */
+	/* save usp */
+	movel   %a1,%d0
+	movel   %usp,%a1
+	movel   %a1,%a0@(TASK_THREAD+THREAD_USP)
+	movel   %d0,%a1
+#endif /* !CONFIG_MMU */
 	/* save non-scratch registers on stack */
 	SAVE_SWITCH_STACK
 
@@ -520,10 +527,12 @@ resume:
 	movel	%a1@(TASK_THREAD+THREAD_USP),%a0
 	movel	%a0,%usp
 
+#ifdef CONFIG_MMU
 	/* restore fs (sfc,%dfc) */
 	movew	%a1@(TASK_THREAD+THREAD_FS),%a0
 	movec	%a0,%sfc
 	movec	%a0,%dfc
+#endif /* CONFIG_MMU */
 
 	/* restore status register */
 	movew	%a1@(TASK_THREAD+THREAD_SR),%sr
