@@ -11,6 +11,8 @@
  * Cache handling functions
  */
 
+#ifdef CONFIG_MMU /* FIXME */
+
 static inline void flush_icache(void)
 {
 	if (CPU_IS_040_OR_060)
@@ -127,6 +129,45 @@ static inline void __flush_page_to_ram(void *vaddr)
 				     : "di" (FLUSH_I));
 	}
 }
+
+#else /* !CONFIG_MMU */
+
+static inline void flush_icache(void)
+{
+}
+
+static inline void cache_clear(unsigned long paddr, int len)
+{
+}
+
+static inline void cache_push(unsigned long paddr, int len)
+{
+}
+
+static inline void cache_push_v(unsigned long vaddr, int len)
+{
+}
+
+static inline void flush_cache_mm(struct mm_struct *mm)
+{
+}
+
+static inline void flush_cache_range(struct vm_area_struct *vma,
+				     unsigned long start,
+				     unsigned long end)
+{
+}
+
+static inline void flush_cache_page(struct vm_area_struct *vma,
+				    unsigned long vmaddr, unsigned long pfn)
+{
+}
+
+static inline void __flush_page_to_ram(void *vaddr)
+{
+}
+
+#endif /* !CONFIG_MMU */
 
 #define ARCH_IMPLEMENTS_FLUSH_DCACHE_PAGE 1
 #define flush_dcache_page(page)		__flush_page_to_ram(page_address(page))
