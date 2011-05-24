@@ -51,7 +51,8 @@ static inline int __ffs(unsigned int val)
 
 static __inline__ void set_bit(int nr, volatile unsigned long * addr)
 {
-#ifdef CONFIG_COLDFIRE
+#if defined(CONFIG_M68000) || defined(CONFIG_M68010) || \
+    defined(CONFIG_COLDFIRE)
 	__asm__ __volatile__ ("lea %0,%%a0; bset %1,(%%a0)"
 	     : "+m" (((volatile char *)addr)[(nr^31) >> 3])
 	     : "d" (nr)
@@ -74,7 +75,8 @@ static __inline__ void set_bit(int nr, volatile unsigned long * addr)
 
 static __inline__ void clear_bit(int nr, volatile unsigned long * addr)
 {
-#ifdef CONFIG_COLDFIRE
+#if defined(CONFIG_M68000) || defined(CONFIG_M68010) || \
+    defined(CONFIG_COLDFIRE)
 	__asm__ __volatile__ ("lea %0,%%a0; bclr %1,(%%a0)"
 	     : "+m" (((volatile char *)addr)[(nr^31) >> 3])
 	     : "d" (nr)
