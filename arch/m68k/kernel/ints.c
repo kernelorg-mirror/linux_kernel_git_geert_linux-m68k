@@ -101,6 +101,7 @@ void __init init_IRQ(void)
 	mach_init_IRQ();
 }
 
+#ifndef CONFIG_UAMIGA
 /**
  * m68k_setup_auto_interrupt
  * @handler: called from auto vector interrupts
@@ -115,6 +116,7 @@ void __init m68k_setup_auto_interrupt(void (*handler)(unsigned int, struct pt_re
 		*auto_irqhandler_fixup = (u32)handler;
 	flush_icache();
 }
+#endif
 
 /**
  * m68k_setup_user_interrupt
