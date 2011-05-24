@@ -486,6 +486,7 @@ asmlinkage int
 sys_atomic_cmpxchg_32(unsigned long newval, int oldval, int d3, int d4, int d5,
 		      unsigned long __user * mem)
 {
+#ifdef CONFIG_MMU
 	/* This was borrowed from ARM's implementation.  */
 	for (;;) {
 		struct mm_struct *mm = current->mm;
@@ -537,6 +538,19 @@ sys_atomic_cmpxchg_32(unsigned long newval, int oldval, int d3, int d4, int d5,
 				return 0xdeadbeef;
 		}
 	}
+#else /* !CONFIG_MMU */
+	struct mm_struct *mm = current->mm;
+	unsigned long mem_value;
+
+	down_read(&mm->mmap_sem);
+
+	mem_value = *mem;
+	if (mem_value == oldval)
+		*mem = newval;
+
+	up_read(&mm->mmap_sem);
+	return mem_value;
+#endif /* !CONFIG_MMU */
 }
 
 asmlinkage int sys_atomic_barrier(void)
