@@ -184,13 +184,16 @@ EXPORT_SYMBOL(kernel_thread);
 
 void flush_thread(void)
 {
-	unsigned long zero = 0;
 	set_fs(USER_DS);
 	current->thread.fs = __USER_DS;
-	if (!FPU_IS_EMU)
+#ifdef CONFIG_FPU
+	if (!FPU_IS_EMU) {
+		unsigned long zero = 0;
 		asm volatile (".chip 68k/68881\n\t"
 			      "frestore %0@\n\t"
 			      ".chip 68k" : : "a" (&zero));
+	}
+#endif /* CONFIG_FPU */
 }
 
 /*
@@ -260,6 +263,7 @@ int copy_thread(unsigned long clone_flags, unsigned long usp,
 	 */
 	p->thread.fs = get_fs().seg;
 
+#ifdef CONFIG_FPU
 	if (!FPU_IS_EMU) {
 		/* Copy the current fpu state */
 		asm volatile ("fsave %0" : : "m" (p->thread.fpstate[0]) : "memory");
@@ -272,6 +276,7 @@ int copy_thread(unsigned long clone_flags, unsigned long usp,
 		/* Restore the state in case the fpu was busy */
 		asm volatile ("frestore %0" : : "m" (p->thread.fpstate[0]));
 	}
+#endif /* CONFIG_FPU */
 
 	return 0;
 }
@@ -280,6 +285,7 @@ int copy_thread(unsigned long clone_flags, unsigned long usp,
 
 int dump_fpu (struct pt_regs *regs, struct user_m68kfp_struct *fpu)
 {
+#ifdef CONFIG_FPU
 	char fpustate[216];
 
 	if (FPU_IS_EMU) {
@@ -308,6 +314,9 @@ int dump_fpu (struct pt_regs *regs, struct user_m68kfp_struct *fpu)
 		:: "m" (fpu->fpregs[0])
 		: "memory");
 	return 1;
+#else /* !CONFIG_FPU */
+	return 0;
+#endif /* !CONFIG_FPU */
 }
 EXPORT_SYMBOL(dump_fpu);
 

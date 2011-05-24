@@ -456,7 +456,7 @@ resume:
 	movel	%sp,%a0@(TASK_THREAD+THREAD_KSP)
 
 	/* save floating point context */
-#ifndef CONFIG_M68KFPU_EMU_ONLY
+#if defined(CONFIG_FPU) && !defined(CONFIG_M68KFPU_EMU_ONLY)
 #ifdef CONFIG_M68KFPU_EMU
 	tstl	m68k_fputype
 	jeq	3f
@@ -490,7 +490,7 @@ resume:
 	movel	%a1,%curptr
 
 	/* restore floating point context */
-#ifndef CONFIG_M68KFPU_EMU_ONLY
+#if defined(CONFIG_FPU) && !defined(CONFIG_M68KFPU_EMU_ONLY)
 #ifdef CONFIG_M68KFPU_EMU
 	tstl	m68k_fputype
 	jeq	4f
