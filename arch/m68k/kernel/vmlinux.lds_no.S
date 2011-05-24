@@ -11,6 +11,14 @@
 #include <asm/page.h>
 #include <asm/thread_info.h>
 
+#ifdef CONFIG_UAMIGA
+#define	RAM_START	CONFIG_RAMBASE
+#define	RAM_LENGTH	0x800000	/* FIXME */
+#define	TEXT		ram
+#define	DATA		ram
+#define	INIT		ram
+#define	BSSS		ram
+#endif
 #if defined(CONFIG_RAMKERNEL)
 #define	RAM_START	CONFIG_KERNELBASE
 #define	RAM_LENGTH	(CONFIG_RAMBASE + CONFIG_RAMSIZE - CONFIG_KERNELBASE)
@@ -168,6 +176,14 @@ SECTIONS {
 	} > INIT
 	INIT_TEXT_SECTION(PAGE_SIZE) > INIT
 	INIT_DATA_SECTION(16) > INIT
+#ifdef CONFIG_UAMIGA
+	.m68k_fixup : {
+	      __start_fixup = .;
+	      *(.m68k_fixup)
+	      __stop_fixup = .;
+	} > DATA
+	NOTES > INIT
+#endif /* CONFIG_UAMIGA */
 	.init.data : {
 		. = ALIGN(PAGE_SIZE);
 		__init_end = .;
