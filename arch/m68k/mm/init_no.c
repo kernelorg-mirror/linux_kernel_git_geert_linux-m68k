@@ -60,7 +60,7 @@ static unsigned long empty_bad_page_table;
 
 static unsigned long empty_bad_page;
 
-unsigned long empty_zero_page;
+void *empty_zero_page;
 
 extern unsigned long memory_start;
 extern unsigned long memory_end;
@@ -93,8 +93,8 @@ void __init paging_init(void)
 	 */
 	empty_bad_page_table = (unsigned long)alloc_bootmem_pages(PAGE_SIZE);
 	empty_bad_page = (unsigned long)alloc_bootmem_pages(PAGE_SIZE);
-	empty_zero_page = (unsigned long)alloc_bootmem_pages(PAGE_SIZE);
-	memset((void *)empty_zero_page, 0, PAGE_SIZE);
+	empty_zero_page = alloc_bootmem_pages(PAGE_SIZE);
+	memset(empty_zero_page, 0, PAGE_SIZE);
 
 	/*
 	 * Set up SFC/DFC registers (user data space).
