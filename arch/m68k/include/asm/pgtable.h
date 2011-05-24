@@ -1,4 +1,4 @@
-#if defined(__uClinux__) && !defined(CONFIG_UAMIGA)
+#if defined(__uClinux__)
 #include "pgtable_no.h"
 #else
 #include "pgtable_mm.h"

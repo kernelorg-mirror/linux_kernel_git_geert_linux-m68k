@@ -32,7 +32,9 @@
 #include <asm/sections.h>
 #include <asm/tlb.h>
 
+#ifdef CONFIG_MMU
 DEFINE_PER_CPU(struct mmu_gather, mmu_gathers);
+#endif
 
 pg_data_t pg_data_map[MAX_NUMNODES];
 EXPORT_SYMBOL(pg_data_map);
@@ -113,7 +115,7 @@ void __init mem_init(void)
 		}
 	}
 
-#ifndef CONFIG_SUN3
+#if defined(CONFIG_MMU) && !defined(CONFIG_SUN3)
 	/* insert pointer tables allocated so far into the tablelist */
 	init_pointer_table((unsigned long)kernel_pg_dir);
 	for (i = 0; i < PTRS_PER_PGD; i++) {
@@ -124,7 +126,7 @@ void __init mem_init(void)
 	/* insert also pointer table that we used to unmap the zero page */
 	if (zero_pgtable)
 		init_pointer_table((unsigned long)zero_pgtable);
-#endif
+#endif /* CONFIG_MMU && !CONFIG_SUN3 */
 
 	printk("Memory: %luk/%luk available (%dk kernel code, %dk data, %dk init)\n",
 	       nr_free_pages() << (PAGE_SHIFT-10),

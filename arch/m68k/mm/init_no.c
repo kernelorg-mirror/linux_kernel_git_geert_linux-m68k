@@ -60,7 +60,11 @@ static unsigned long empty_bad_page_table;
 
 static unsigned long empty_bad_page;
 
+#ifdef CONFIG_UAMIGA
+extern void *empty_zero_page;
+#else
 void *empty_zero_page;
+#endif
 
 extern unsigned long memory_start;
 extern unsigned long memory_end;
@@ -80,7 +84,11 @@ void __init paging_init(void)
 #ifdef DEBUG
 	unsigned long start_mem = PAGE_ALIGN(memory_start);
 #endif
+#ifdef CONFIG_UAMIGA
+	unsigned long end_mem   = m68k_memory[0].addr+m68k_memory[0].size;
+#else
 	unsigned long end_mem   = memory_end & PAGE_MASK;
+#endif
 
 #ifdef DEBUG
 	printk (KERN_DEBUG "start_mem is %#lx\nvirtual_end is %#lx\n",
@@ -116,6 +124,7 @@ void __init paging_init(void)
 	}
 }
 
+#ifndef CONFIG_UAMIGA
 void __init mem_init(void)
 {
 	int codek = 0, datak = 0, initk = 0;
@@ -165,6 +174,8 @@ void free_initrd_mem(unsigned long start, unsigned long end)
 	printk (KERN_NOTICE "Freeing initrd memory: %luk freed\n", pages * (PAGE_SIZE / 1024));
 }
 #endif
+
+#endif /* !CONFIG_UAMIGA */
 
 void
 free_initmem()
