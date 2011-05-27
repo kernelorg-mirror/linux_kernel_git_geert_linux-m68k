@@ -12,7 +12,7 @@
 #include <asm/thread_info.h>
 
 #ifdef CONFIG_UAMIGA
-#define	RAM_START	CONFIG_RAMBASE
+#define	RAM_START	CONFIG_RAMBASE + PAGE_SIZE
 #define	RAM_LENGTH	0x800000	/* FIXME */
 #define	TEXT		ram
 #define	DATA		ram
