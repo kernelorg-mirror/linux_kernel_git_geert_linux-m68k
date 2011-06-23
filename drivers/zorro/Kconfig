@@ -2,9 +2,11 @@
 #
 # Zorro configuration
 #
+
+if ZORRO
+
 config ZORRO_NAMES
 	bool "Zorro device name database"
-	depends on ZORRO
 	help
 	  By default, the kernel contains a database of all known Zorro device
 	  names to make the information in /proc/iomem comprehensible to the
@@ -17,3 +19,89 @@ config ZORRO_NAMES
 
 	  When in doubt, say Y.
 
+
+# Zorro multifunction drivers
+
+config ARIADNE_MFD
+	tristate "Ariadne multifunction driver"
+	select MFD_CORE
+	help
+	  If you have a Village Tronic Ariadne Ethernet Card and Parallel
+	  Ports adapter, say Y.  Otherwise, say N.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called ariadne-mfd.
+
+config ARIADNE2_MFD
+	tristate "Ariadne II multifunction driver"
+	select MFD_CORE
+	select ZORRO8390 if NETDEVICES && ETHERNET && NET_VENDOR_NATSEMI && NET_VENDOR_8390
+	help
+	  If you have a Village Tronic Ariadne II Ethernet Card, say Y.
+	  Otherwise, say N.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called ariadne2-mfd.
+
+config BUDDHA_MFD
+	tristate "Buddha multifunction driver"
+	select MFD_CORE
+	select BLK_DEV_BUDDHA if IDE
+	help
+	  If you have an Individual Computers Buddha IDE Interface adapter,
+	  say Y.  Otherwise, say N.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called buddha-mfd.
+
+config CATWEASEL_MFD
+	tristate "Catweasel multifunction driver"
+	select MFD_CORE
+	help
+	  If you have an Individual Computers Catweasel IDE Interface and
+	  Floppy Controller adapter, say Y.  Otherwise, say N.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called catweasel-mfd.
+
+config XSURF_MFD
+	tristate "X-Surf multifunction driver"
+	select MFD_CORE
+	help
+	  If you have an Individual Computers X-Surf Ethernet Card and IDE
+	  Interface adapter, say Y.  Otherwise, say N.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called catweasel-mfd.
+
+
+# FIXME Dummy cell drivers
+
+# FIXME Convert existing ARIADNE driver to cell driver
+config ARIADNE_NET
+	tristate "Dummy Ariadne network driver"
+	depends on ARIADNE_MFD
+	help
+	  TODO
+
+config ARIADNE_PAR
+	tristate "Dummy Ariadne parport driver"
+	depends on ARIADNE_MFD
+	help
+	  TODO
+
+# FIXME Convert existing BLK_DEV_BUDDHA driver to cell driver
+config BUDDHA_IDE
+	tristate "Dummy Buddha IDE driver"
+	depends on BUDDHA_MFD || CATWEASEL_MFD || XSURF_MFD
+
+config CATWEASEL_FLOPPY
+	tristate "Dummy Catweasel floppy driver"
+	depends on CATWEASEL_MFD
+
+# FIXME Convert existing ZORRO8390 driver to cell driver
+config 8390_CELL
+	tristate "Dummy 8390 network driver"
+	depends on ARIADNE2_MFD || XSURF_MFD
+
+endif
