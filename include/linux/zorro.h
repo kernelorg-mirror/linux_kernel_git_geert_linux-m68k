@@ -63,6 +63,18 @@ struct zorro_driver {
 extern int zorro_register_driver(struct zorro_driver *);
 extern void zorro_unregister_driver(struct zorro_driver *);
 
+/**
+ * module_zorro_driver() - Helper macro for registering a Zorro driver
+ * @__zorro_driver: zorro_driver struct
+ *
+ * Helper macro for Zorro drivers which do not do anything special in module
+ * init/exit. This eliminates a lot of boilerplate. Each module may only
+ * use this macro once, and calling it replaces module_init() and module_exit()
+ */
+#define module_zorro_driver(__zorro_driver) \
+	module_driver(__zorro_driver, zorro_register_driver, \
+		       zorro_unregister_driver)
+
 
 extern unsigned int zorro_num_autocon;	/* # of autoconfig devices found */
 extern struct zorro_dev *zorro_autocon;
