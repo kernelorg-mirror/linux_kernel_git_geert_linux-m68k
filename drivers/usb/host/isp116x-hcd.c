@@ -81,7 +81,24 @@ MODULE_LICENSE("GPL");
 
 static const char hcd_name[] = "isp116x-hcd";
 
+
 /*-----------------------------------------------------------------*/
+
+  /*
+   * 16 bit data bus byte swapped in hardware
+   *
+   * isp116x_write_addr uses raw_readw - hw byte swap takes care of different
+   *                                     endianness
+   *
+   * isp116x_write_data16 uses raw_readw - byte swap done in hw so BE data ends
+   *                                       up in proper LE format
+   * isp116x_raw_write_data16 uses readw - effectively same endiannes retained,
+   *                                       use for LE format data
+   *
+   * reversed semantics of primitives allows to keep the register
+   * access functions unchanged for commands and control data - byte
+   * swap done transparently
+   */
 
 /*
   Write len bytes to fifo, pad till 32-bit boundary
@@ -99,18 +116,27 @@ static void write_ptddata_to_fifo(struct isp116x *isp116x, void *buf, int len)
 
 	if ((unsigned long)dp2 & 1) {
 		/* not aligned */
+
 		for (; len > 1; len -= 2) {
 			w = *dp++;
 			w |= *dp++ << 8;
 			isp116x_raw_write_data16(isp116x, w);
 		}
 		if (len)
+#ifdef CONFIG_ATARI	/* MSch: needs swap */
+			isp116x_raw_write_data16(isp116x, (u16) *dp);
+#else
 			isp116x_write_data16(isp116x, (u16) * dp);
+#endif
 	} else {
 		/* aligned */
 		for (; len > 1; len -= 2) {
 			/* Keep byte order ! */
+#ifdef CONFIG_ATARI	/* MSch: needs swap */
+			isp116x_write_data16(isp116x, cpu_to_le16(*dp2++));
+#else
 			isp116x_raw_write_data16(isp116x, cpu_to_le16(*dp2++));
+#endif
 		}
 
 		if (len)
@@ -136,6 +162,7 @@ static void read_ptddata_from_fifo(struct isp116x *isp116x, void *buf, int len)
 
 	if ((unsigned long)dp2 & 1) {
 		/* not aligned */
+
 		for (; len > 1; len -= 2) {
 			w = isp116x_raw_read_data16(isp116x);
 			*dp++ = w & 0xff;
@@ -143,12 +170,20 @@ static void read_ptddata_from_fifo(struct isp116x *isp116x, void *buf, int len)
 		}
 
 		if (len)
+#ifdef CONFIG_ATARI	/* MSch: needs swap */
+			*dp = 0xff & isp116x_raw_read_data16(isp116x);
+#else
 			*dp = 0xff & isp116x_read_data16(isp116x);
+#endif
 	} else {
 		/* aligned */
 		for (; len > 1; len -= 2) {
 			/* Keep byte order! */
+#ifdef CONFIG_ATARI	/* MSch: needs swap */
+			*dp2++ = le16_to_cpu(isp116x_read_data16(isp116x));
+#else
 			*dp2++ = le16_to_cpu(isp116x_raw_read_data16(isp116x));
+#endif
 		}
 
 		if (len)
@@ -1260,6 +1295,12 @@ static int isp116x_reset(struct usb_hcd *hcd)
 	u16 clkrdy = 0;
 	int ret, timeout = 15 /* ms */ ;
 
+#if defined(CONFIG_ATARI)
+	/* NetUSBee needs longer timeout */
+	if ((unsigned long) hcd->rsrc_start < 0x80000000UL)
+		timeout = 200;
+#endif
+
 	ret = isp116x_sw_reset(isp116x);
 	if (ret)
 		return ret;
@@ -1290,6 +1331,11 @@ static void isp116x_stop(struct usb_hcd *hcd)
 	u32 val;
 
 	spin_lock_irqsave(&isp116x->lock, flags);
+
+#ifdef CONFIG_ATARI
+	if ((unsigned long) hcd->rsrc_start >= 0x80000000UL)
+		disable_irq(hcd->irq);
+#endif
 	isp116x_write_reg16(isp116x, HCuPINTENB, 0);
 
 	/* Switch off ports' power, some devices don't come up
@@ -1315,6 +1361,10 @@ static int isp116x_start(struct usb_hcd *hcd)
 
 	spin_lock_irqsave(&isp116x->lock, flags);
 
+#ifdef CONFIG_ATARI
+	if ((unsigned long) hcd->rsrc_start >= 0x80000000UL)
+		disable_irq(hcd->irq);
+#endif
 	/* clear interrupt status and disable all interrupt sources */
 	isp116x_write_reg16(isp116x, HCuPINT, 0xff);
 	isp116x_write_reg16(isp116x, HCuPINTENB, 0);
@@ -1355,6 +1405,12 @@ static int isp116x_start(struct usb_hcd *hcd)
 	val |= RH_A_PSM;
 	/* Report overcurrent per port */
 	val |= RH_A_OCPM;
+#ifdef CONFIG_ATARI
+	/* Galvez: For NetUSBee, Overcurrent protection disable,
+	   to stop interrupt storm because OC events */
+	if ((unsigned long) hcd->rsrc_start < 0x80000000UL)
+		val |= (RH_A_NOCP | RH_A_NPS);
+#endif
 	isp116x_write_reg32(isp116x, HCRHDESCA, val);
 	isp116x->rhdesca = isp116x_read_reg32(isp116x, HCRHDESCA);
 
@@ -1394,6 +1450,10 @@ static int isp116x_start(struct usb_hcd *hcd)
 	isp116x_write_reg32(isp116x, HCRHPORT2, RH_PS_CCS);
 
 	isp116x_show_regs_log(isp116x);
+#ifdef CONFIG_ATARI
+	if ((unsigned long) hcd->rsrc_start >= 0x80000000UL)
+		enable_irq(hcd->irq);
+#endif
 	spin_unlock_irqrestore(&isp116x->lock, flags);
 	return 0;
 }
@@ -1551,7 +1611,6 @@ static int isp116x_remove(struct platform_device *pdev)
 	iounmap(isp116x->addr_reg);
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	release_mem_region(res->start, 2);
-
 	usb_put_hcd(hcd);
 	return 0;
 }
@@ -1612,6 +1671,11 @@ static int isp116x_probe(struct platform_device *pdev)
 		goto err4;
 	}
 
+#ifdef CONFIG_ATARI
+	pr_info("ISP116X probe: data %p virt. %p, addr %p virt. %p\n",
+		(void *)data->start, data_reg, (void *)addr->start, addr_reg);
+#endif
+
 	/* allocate and initialize hcd */
 	hcd = usb_create_hcd(&isp116x_hc_driver, &pdev->dev, dev_name(&pdev->dev));
 	if (!hcd) {
@@ -1640,6 +1704,11 @@ static int isp116x_probe(struct platform_device *pdev)
 		goto err6;
 	}
 
+#ifdef CONFIG_ATARI
+	/* Disable USB interrupt in the EtherNat board */
+	if ((unsigned long) hcd->rsrc_start >= 0x80000000UL)
+		disable_irq(irq);
+#endif
 	ret = usb_add_hcd(hcd, irq, irqflags);
 	if (ret)
 		goto err6;
@@ -1653,6 +1722,7 @@ static int isp116x_probe(struct platform_device *pdev)
 	}
 
 	return 0;
+
 
       err7:
 	usb_remove_hcd(hcd);
