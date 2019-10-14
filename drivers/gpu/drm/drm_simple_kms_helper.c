@@ -96,6 +96,20 @@ drm_simple_kms_crtc_mode_valid(struct drm_crtc *crtc,
 	return pipe->funcs->mode_valid(pipe, mode);
 }
 
+static bool
+drm_simple_kms_crtc_mode_fixup(struct drm_crtc *crtc,
+			       const struct drm_display_mode *mode,
+			       struct drm_display_mode *adjusted_mode)
+{
+	struct drm_simple_display_pipe *pipe;
+
+	pipe = container_of(crtc, struct drm_simple_display_pipe, crtc);
+	if (!pipe->funcs || !pipe->funcs->mode_fixup)
+		return true;
+
+	return pipe->funcs->mode_fixup(crtc, mode, adjusted_mode);
+}
+
 static int drm_simple_kms_crtc_check(struct drm_crtc *crtc,
 				     struct drm_atomic_state *state)
 {
@@ -141,6 +155,7 @@ static void drm_simple_kms_crtc_disable(struct drm_crtc *crtc,
 
 static const struct drm_crtc_helper_funcs drm_simple_kms_crtc_helper_funcs = {
 	.mode_valid = drm_simple_kms_crtc_mode_valid,
+	.mode_fixup = drm_simple_kms_crtc_mode_fixup,
 	.atomic_check = drm_simple_kms_crtc_check,
 	.atomic_enable = drm_simple_kms_crtc_enable,
 	.atomic_disable = drm_simple_kms_crtc_disable,
