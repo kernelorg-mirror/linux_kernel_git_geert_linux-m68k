@@ -30,8 +30,9 @@
 #include <linux/init_task.h>
 #include <linux/mqueue.h>
 #include <linux/rcupdate.h>
-
+#include <linux/syscalls.h>
 #include <linux/uaccess.h>
+
 #include <asm/traps.h>
 #include <asm/machdep.h>
 #include <asm/setup.h>
@@ -129,6 +130,16 @@ asmlinkage int m68k_clone(struct pt_regs *regs)
 		return -EINVAL;
 
 	return _do_fork(&args);
+}
+
+/*
+ * Because extra registers are saved on the stack after the sys_clone3()
+ * arguments, this C wrapper extracts them from pt_regs * and then calls the
+ * generic sys_clone3() implementation.
+ */
+asmlinkage int m68k_clone3(struct pt_regs *regs)
+{
+	return sys_clone3((struct clone_args __user *)regs->d1, regs->d2);
 }
 
 int copy_thread_tls(unsigned long clone_flags, unsigned long usp,
