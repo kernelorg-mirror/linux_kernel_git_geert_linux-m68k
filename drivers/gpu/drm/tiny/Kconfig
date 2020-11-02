@@ -10,6 +10,14 @@ config DRM_ARCPGU
 
 	  If M is selected the module will be called arcpgu.
 
+config DRM_ATARI
+	tristate "DRM support for Atari native chipset"
+	depends on DRM && ATARI
+	select DRM_KMS_HELPER
+	select DRM_GEM_SHMEM_HELPER
+	help
+	 This is a KMS driver for the builtin graphics chipset found in Ataris.
+
 config DRM_BOCHS
 	tristate "DRM Support for bochs dispi vga interface (qemu stdvga)"
 	depends on DRM && PCI && MMU
