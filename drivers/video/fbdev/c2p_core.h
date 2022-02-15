@@ -143,6 +143,44 @@ static __always_inline void transp4x(u32 d[], unsigned int n, unsigned int m)
 
 
     /*
+     *  Transpose operations on 2 32-bit words
+     */
+
+static __always_inline void transp2(u32 d[], unsigned int n, unsigned int m)
+{
+	u32 mask = get_mask(n);
+
+	switch (m) {
+	case 1:
+		/* Single n x 1 block */
+		_transp(d, 0, 1, n, mask);
+		return;
+	}
+
+	BUILD_BUG();
+}
+
+
+    /*
+     *  Transpose operations on 2 32-bit words (reverse order)
+     */
+
+static __always_inline void transp2x(u32 d[], unsigned int n, unsigned int m)
+{
+	u32 mask = get_mask(n);
+
+	switch (m) {
+	case 1:
+		/* Single n x 1 block */
+		_transp(d, 1, 0, n, mask);
+		return;
+	}
+
+	BUILD_BUG();
+}
+
+
+    /*
      *  Compose two values, using a bitmask as decision value
      *  This is equivalent to (a & mask) | (b & ~mask)
      */
