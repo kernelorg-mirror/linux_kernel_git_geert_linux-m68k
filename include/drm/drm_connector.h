@@ -1832,6 +1832,15 @@ struct drm_connector_hdmi {
 	} infoframes;
 };
 
+struct drm_named_mode {
+	const char *name;
+	unsigned int pixel_clock_khz;
+	unsigned int xres;
+	unsigned int yres;
+	unsigned int flags;
+	unsigned int tv_mode;
+};
+
 /**
  * struct drm_connector - central DRM connector control structure
  *
@@ -2253,6 +2262,16 @@ struct drm_connector {
 	 * @hdmi_audio: HDMI codec properties and non-DRM state.
 	 */
 	struct drm_connector_hdmi_audio hdmi_audio;
+
+	/**
+	 * @named_modes:
+	 *
+	 * Optional NULL-terminated array of names to be considered valid mode
+	 * names.  This lets the command line option parser distinguish between
+	 * mode names and freestanding extras and/or options.
+	 * If not set, a set of defaults will be used.
+	 */
+	const struct drm_named_mode *named_modes;
 };
 
 #define obj_to_connector(x) container_of(x, struct drm_connector, base)

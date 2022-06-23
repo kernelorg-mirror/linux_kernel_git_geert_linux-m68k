@@ -2256,15 +2256,6 @@ static int drm_mode_parse_cmdline_options(const char *str,
 	return 0;
 }
 
-struct drm_named_mode {
-	const char *name;
-	unsigned int pixel_clock_khz;
-	unsigned int xres;
-	unsigned int yres;
-	unsigned int flags;
-	unsigned int tv_mode;
-};
-
 #define NAMED_MODE(_name, _pclk, _x, _y, _flags, _mode)	\
 	{						\
 		.name = _name,				\
@@ -2280,12 +2271,15 @@ static const struct drm_named_mode drm_named_modes[] = {
 	NAMED_MODE("NTSC-J", 13500, 720, 480, DRM_MODE_FLAG_INTERLACE, DRM_MODE_TV_MODE_NTSC_J),
 	NAMED_MODE("PAL", 13500, 720, 576, DRM_MODE_FLAG_INTERLACE, DRM_MODE_TV_MODE_PAL),
 	NAMED_MODE("PAL-M", 13500, 720, 480, DRM_MODE_FLAG_INTERLACE, DRM_MODE_TV_MODE_PAL_M),
+	{ /* sentinel */ }
 };
 
 static int drm_mode_parse_cmdline_named_mode(const char *name,
 					     unsigned int name_end,
+					     const struct drm_connector *connector,
 					     struct drm_cmdline_mode *cmdline_mode)
 {
+	const struct drm_named_mode *named_modes;
 	unsigned int i;
 
 	if (!name_end)
@@ -2311,8 +2305,9 @@ static int drm_mode_parse_cmdline_named_mode(const char *name,
 	 * We're sure we're a named mode at this point, iterate over the
 	 * list of modes we're aware of.
 	 */
-	for (i = 0; i < ARRAY_SIZE(drm_named_modes); i++) {
-		const struct drm_named_mode *mode = &drm_named_modes[i];
+	named_modes = connector->named_modes ? : drm_named_modes;
+	for (i = 0; named_modes[i].name; i++) {
+		const struct drm_named_mode *mode = &named_modes[i];
 		int ret;
 
 		ret = str_has_prefix(name, mode->name);
@@ -2413,7 +2408,8 @@ bool drm_mode_parse_command_line_for_connector(const char *mode_option,
 	if (!mode_end)
 		return false;
 
-	ret = drm_mode_parse_cmdline_named_mode(name, mode_end, mode);
+	ret = drm_mode_parse_cmdline_named_mode(name, mode_end, connector,
+						mode);
 	if (ret < 0)
 		return false;
 
