@@ -1828,6 +1828,8 @@ bool drm_mode_parse_command_line_for_connector(const char *mode_option,
 
 	/* Try to locate the bpp and refresh specifiers, if any */
 	bpp_ptr = strchr(name, '-');
+	while (bpp_ptr && !isdigit(bpp_ptr[1]))
+		bpp_ptr = strchr(bpp_ptr + 1, '-');
 	if (bpp_ptr)
 		bpp_off = bpp_ptr - name;
 
