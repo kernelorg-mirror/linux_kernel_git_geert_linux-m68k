@@ -1315,6 +1315,14 @@ struct drm_cmdline_mode {
 	struct drm_connector_tv_margins tv_margins;
 };
 
+struct drm_named_mode {
+	const char *name;
+	unsigned int pixel_clock_khz;
+	unsigned int xres;
+	unsigned int yres;
+	unsigned int flags;
+};
+
 /**
  * struct drm_connector - central DRM connector control structure
  *
@@ -1708,6 +1716,16 @@ struct drm_connector {
 
 	/** @hdr_sink_metadata: HDR Metadata Information read from sink */
 	struct hdr_sink_metadata hdr_sink_metadata;
+
+	/**
+	 * @named_modes:
+	 *
+	 * Optional NULL-terminated array of names to be considered valid mode
+	 * names.  This lets the command line option parser distinguish between
+	 * mode names and freestanding extras and/or options.
+	 * If not set, a set of defaults will be used.
+	 */
+	const struct drm_named_mode *named_modes;
 };
 
 #define obj_to_connector(x) container_of(x, struct drm_connector, base)
