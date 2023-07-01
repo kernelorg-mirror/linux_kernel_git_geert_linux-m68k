@@ -376,6 +376,8 @@ source "drivers/gpu/drm/mgag200/Kconfig"
 
 source "drivers/gpu/drm/armada/Kconfig"
 
+source "drivers/gpu/drm/atari/Kconfig"
+
 source "drivers/gpu/drm/atmel-hlcdc/Kconfig"
 
 source "drivers/gpu/drm/renesas/Kconfig"
