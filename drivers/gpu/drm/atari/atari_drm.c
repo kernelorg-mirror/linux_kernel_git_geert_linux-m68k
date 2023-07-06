@@ -3494,7 +3494,7 @@ static int atari_drm_fb_blit_rect(const struct drm_framebuffer *fb,
 				       drm_fb_clip_offset(atari_drm->pitch,
 							  fb->format, rect));
 			drm_fb_xrgb8888_to_rgb565(&dst, &atari_drm->pitch, map,
-						  fb, rect, false);
+						  fb, rect, true);
 			break;
 
 		default:
