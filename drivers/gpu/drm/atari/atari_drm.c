@@ -4548,8 +4548,6 @@ static int __init atari_drm_probe(struct platform_device *pdev)
 	// so set sane var first, then call atafb_set_par
 	atafb_get_var(&fb_info.var, &fb_info);
 
-	fb_info.flags = FBINFO_FLAG_DEFAULT;
-
 	atafb_set_disp(&fb_info);
 
 	dev_info(&pdev->dev, "Determined %dx%d, depth %d\n", fb_info.var.xres,
