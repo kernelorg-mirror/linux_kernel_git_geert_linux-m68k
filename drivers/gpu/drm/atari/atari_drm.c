@@ -3237,7 +3237,8 @@ static void drm_fb_rgb565_to_rgb332_line(u8 *dbuf, const __le16 *sbuf,
 
 static void atari_drm_fb_rgb565_to_rgb332(const void *vaddr,
 					  const struct drm_framebuffer *fb,
-					  const struct drm_rect *rect)
+					  const struct drm_rect *rect,
+					  struct drm_format_conv_state *state)
 {
 	struct atari_drm_device *atari_drm = atari_drm_from_dev(fb->dev);
 	unsigned int words, pixels, lines, x1;
@@ -3253,7 +3254,7 @@ static void atari_drm_fb_rgb565_to_rgb332(const void *vaddr,
 	pixels = words * 16;
 	lines = drm_rect_height(rect);
 
-	buf = kmalloc(pixels, GFP_KERNEL);
+	buf = drm_format_conv_state_reserve(state, pixels, GFP_KERNEL);
 	if (!buf)
 		return;
 
@@ -3266,8 +3267,6 @@ static void atari_drm_fb_rgb565_to_rgb332(const void *vaddr,
 		vaddr += fb->pitches[0];
 		dst += atari_drm->pitch;
 	}
-
-	kfree(buf);
 }
 
 static void drm_fb_rgb565be_to_rgb332_line(u8 *dbuf, const __be16 *sbuf,
@@ -3286,7 +3285,8 @@ static void drm_fb_rgb565be_to_rgb332_line(u8 *dbuf, const __be16 *sbuf,
 
 static void atari_drm_fb_rgb565be_to_rgb332(const void *vaddr,
 					    const struct drm_framebuffer *fb,
-					    const struct drm_rect *rect)
+					    const struct drm_rect *rect,
+					    struct drm_format_conv_state *state)
 {
 	struct atari_drm_device *atari_drm = atari_drm_from_dev(fb->dev);
 	unsigned int words, pixels, lines, x1;
@@ -3302,7 +3302,7 @@ static void atari_drm_fb_rgb565be_to_rgb332(const void *vaddr,
 	pixels = words * 16;
 	lines = drm_rect_height(rect);
 
-	buf = kmalloc(pixels, GFP_KERNEL);
+	buf = drm_format_conv_state_reserve(state, pixels, GFP_KERNEL);
 	if (!buf)
 		return;
 
@@ -3315,8 +3315,6 @@ static void atari_drm_fb_rgb565be_to_rgb332(const void *vaddr,
 		vaddr += fb->pitches[0];
 		dst += atari_drm->pitch;
 	}
-
-	kfree(buf);
 }
 #endif // EMULATE_LESSER_FORMATS
 
@@ -3337,7 +3335,8 @@ static void drm_fb_xrgb8888_to_rgb332_line(u8 *dbuf, const __le32 *sbuf,
 
 static void atari_drm_fb_xrgb8888_to_rgb332(const void *vaddr,
 					    const struct drm_framebuffer *fb,
-					    const struct drm_rect *rect)
+					    const struct drm_rect *rect,
+					    struct drm_format_conv_state *state)
 {
 	struct atari_drm_device *atari_drm = atari_drm_from_dev(fb->dev);
 	unsigned int words, pixels, lines, x1;
@@ -3353,7 +3352,7 @@ static void atari_drm_fb_xrgb8888_to_rgb332(const void *vaddr,
 	pixels = words * 16;
 	lines = drm_rect_height(rect);
 
-	buf = kmalloc(pixels, GFP_KERNEL);
+	buf = drm_format_conv_state_reserve(state, pixels, GFP_KERNEL);
 	if (!buf)
 		return;
 
@@ -3366,13 +3365,12 @@ static void atari_drm_fb_xrgb8888_to_rgb332(const void *vaddr,
 		vaddr += fb->pitches[0];
 		dst += atari_drm->pitch;
 	}
-
-	kfree(buf);
 }
 
 static int atari_drm_fb_blit_rect(const struct drm_framebuffer *fb,
 				  const struct iosys_map *map,
-				  struct drm_rect *rect)
+				  struct drm_rect *rect,
+				  struct drm_format_conv_state *state)
 {
 	struct atari_drm_device *atari_drm = atari_drm_from_dev(fb->dev);
 	void *vmap = map->vaddr; /* TODO: Use mapping abstraction properly */
@@ -3445,7 +3443,7 @@ static int atari_drm_fb_blit_rect(const struct drm_framebuffer *fb,
 #ifdef EMULATE_LESSER_FORMATS
 		case 8:
 			// FIXME For testing only
-			atari_drm_fb_rgb565_to_rgb332(vmap, fb, rect);
+			atari_drm_fb_rgb565_to_rgb332(vmap, fb, rect, state);
 			break;
 #endif // EMULATE_LESSER_FORMATS
 
@@ -3454,7 +3452,7 @@ static int atari_drm_fb_blit_rect(const struct drm_framebuffer *fb,
 				       drm_fb_clip_offset(atari_drm->pitch,
 							  fb->format, rect));
 			drm_fb_swab(&dst, &atari_drm->pitch, map, fb, rect,
-				    true);
+				    true, state);
 			break;
 
 		default:
@@ -3467,7 +3465,7 @@ static int atari_drm_fb_blit_rect(const struct drm_framebuffer *fb,
 #ifdef EMULATE_LESSER_FORMATS
 		case 8:
 			// FIXME For testing only
-			atari_drm_fb_rgb565be_to_rgb332(vmap, fb, rect);
+			atari_drm_fb_rgb565be_to_rgb332(vmap, fb, rect, state);
 			break;
 #endif // EMULATE_LESSER_FORMATS
 
@@ -3486,7 +3484,7 @@ static int atari_drm_fb_blit_rect(const struct drm_framebuffer *fb,
 	case DRM_FORMAT_XRGB8888:
 		switch (atari_drm->bpp) {
 		case 8:
-			atari_drm_fb_xrgb8888_to_rgb332(vmap, fb, rect);
+			atari_drm_fb_xrgb8888_to_rgb332(vmap, fb, rect, state);
 			break;
 
 		case 16:
@@ -3494,7 +3492,7 @@ static int atari_drm_fb_blit_rect(const struct drm_framebuffer *fb,
 				       drm_fb_clip_offset(atari_drm->pitch,
 							  fb->format, rect));
 			drm_fb_xrgb8888_to_rgb565(&dst, &atari_drm->pitch, map,
-						  fb, rect, true);
+						  fb, rect, state, true);
 			break;
 
 		default:
@@ -3514,7 +3512,8 @@ unsupported:
 }
 
 static int atari_drm_fb_blit_fullscreen(struct drm_framebuffer *fb,
-					const struct iosys_map *map)
+					const struct iosys_map *map,
+					struct drm_format_conv_state *state)
 {
 	struct drm_rect fullscreen = {
 		.x1 = 0,
@@ -3522,7 +3521,7 @@ static int atari_drm_fb_blit_fullscreen(struct drm_framebuffer *fb,
 		.y1 = 0,
 		.y2 = fb->height,
 	};
-	return atari_drm_fb_blit_rect(fb, map, &fullscreen);
+	return atari_drm_fb_blit_rect(fb, map, &fullscreen, state);
 }
 
 static int atari_drm_check_size(int width, int height,
@@ -4174,7 +4173,8 @@ static void atari_drm_pipe_enable(struct drm_simple_display_pipe *pipe,
 	atari_drm_mode_set(atari_drm, &crtc_state->mode, fb);
 	atafb_blank(FB_BLANK_UNBLANK, &fb_info);
 
-	atari_drm_fb_blit_fullscreen(fb, &shadow_plane_state->data[0]);
+	atari_drm_fb_blit_fullscreen(fb, &shadow_plane_state->data[0],
+				     &shadow_plane_state->fmtcnv_state);
 }
 
 static void atari_drm_pipe_disable(struct drm_simple_display_pipe *pipe)
@@ -4272,7 +4272,8 @@ static void atari_drm_pipe_update(struct drm_simple_display_pipe *pipe,
 
 	if (drm_atomic_helper_damage_merged(old_plane_state, plane_state,
 					    &rect))
-		atari_drm_fb_blit_rect(fb, &shadow_plane_state->data[0], &rect);
+		atari_drm_fb_blit_rect(fb, &shadow_plane_state->data[0], &rect,
+				       &shadow_plane_state->fmtcnv_state);
 
 	// FIXME removing the block below triggers WARN_ON(new_crtc_state->event) in drivers/gpu/drm/drm_atomic_helper.c:2475 drm_atomic_helper_commit_hw_done
 	// FIXME I still see that warning when running modetest
