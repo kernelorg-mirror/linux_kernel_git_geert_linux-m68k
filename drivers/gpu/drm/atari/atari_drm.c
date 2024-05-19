@@ -2173,7 +2173,7 @@ static void ext_set_par(struct atafb_par *par)
 	(*((unsigned volatile char *) ((port)+external_vgaiobase)))
 #define DACDelay				\
 	do {					\
-		unsigned char tmp = INB(0x3da);	\
+		unsigned char __maybe_unused tmp = INB(0x3da);	\
 		tmp = INB(0x3da);			\
 	} while (0)
 
