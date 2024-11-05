@@ -34,7 +34,7 @@
 #include <drm/drm_damage_helper.h>
 #include <drm/drm_drv.h>
 #include <drm/drm_fb_helper.h>
-#include <drm/drm_fbdev_generic.h>
+#include <drm/drm_fbdev_shmem.h>
 #include <drm/drm_file.h>
 #include <drm/drm_format_helper.h>
 #include <drm/drm_fourcc.h>
@@ -4586,7 +4586,7 @@ static int __init atari_drm_probe(struct platform_device *pdev)
 	dev_info(&pdev->dev, "Atari DRM, using %dK of video memory\n",
 		 screen_len >> 10);
 
-	drm_fbdev_generic_setup(dev, dev->mode_config.preferred_depth);
+	drm_fbdev_shmem_setup(dev, dev->mode_config.preferred_depth);
 
 	/* TODO: This driver cannot be unloaded yet */
 	return 0;
