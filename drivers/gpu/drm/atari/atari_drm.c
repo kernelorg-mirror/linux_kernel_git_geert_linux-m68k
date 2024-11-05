@@ -18,6 +18,7 @@
 #include <linux/platform_device.h>
 #include <linux/string.h>
 #include <linux/uaccess.h>
+#include <linux/unaligned.h>
 
 #include <asm/atarihw.h>
 #include <asm/atariints.h>
@@ -26,7 +27,6 @@
 #include <asm/io.h>
 #include <asm/irq.h>
 #include <asm/setup.h>
-#include <asm/unaligned.h>
 
 #include <drm/drm_atomic_helper.h>
 #include <drm/drm_atomic_state_helper.h>
