@@ -30,6 +30,7 @@
 
 #include <drm/drm_atomic_helper.h>
 #include <drm/drm_atomic_state_helper.h>
+#include <drm/drm_client_setup.h>
 #include <drm/drm_connector.h>
 #include <drm/drm_damage_helper.h>
 #include <drm/drm_drv.h>
@@ -4406,16 +4407,15 @@ static int atari_drm_mode_config_init(struct atari_drm_device *atari_drm)
 DEFINE_DRM_GEM_FOPS(atari_drm_fops);
 
 static const struct drm_driver atari_drm_driver = {
-	.driver_features = DRIVER_MODESET | DRIVER_GEM | DRIVER_ATOMIC,
-
+	DRM_GEM_SHMEM_DRIVER_OPS,
+	DRM_FBDEV_SHMEM_DRIVER_OPS,
 	.name		 = DRIVER_NAME,
 	.desc		 = "Atari",
 	.date		 = "2020",
 	.major		 = 1,
 	.minor		 = 0,
-
+	.driver_features = DRIVER_MODESET | DRIVER_GEM | DRIVER_ATOMIC,
 	.fops		 = &atari_drm_fops,
-	DRM_GEM_SHMEM_DRIVER_OPS,
 };
 
 static int __init atari_drm_probe(struct platform_device *pdev)
@@ -4586,7 +4586,24 @@ static int __init atari_drm_probe(struct platform_device *pdev)
 	dev_info(&pdev->dev, "Atari DRM, using %dK of video memory\n",
 		 screen_len >> 10);
 
-	drm_fbdev_shmem_setup(dev, dev->mode_config.preferred_depth);
+	// FIXME Clean up default format selection
+	switch (dev->mode_config.preferred_depth) {
+	case 1:
+		drm_client_setup_with_fourcc(dev, DRM_FORMAT_C1);
+		break;
+
+	case 2:
+		drm_client_setup_with_fourcc(dev, DRM_FORMAT_C2);
+		break;
+
+	case 4:
+		drm_client_setup_with_fourcc(dev, DRM_FORMAT_C4);
+		break;
+
+	case 8:
+		drm_client_setup_with_fourcc(dev, DRM_FORMAT_C8);
+		break;
+	}
 
 	/* TODO: This driver cannot be unloaded yet */
 	return 0;

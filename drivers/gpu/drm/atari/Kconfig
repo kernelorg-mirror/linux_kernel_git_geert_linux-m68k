@@ -3,6 +3,7 @@
 config DRM_ATARI
 	tristate "DRM support for Atari native chipset"
 	depends on DRM && ATARI
+	select DRM_CLIENT_SELECTION
 	select DRM_GEM_SHMEM_HELPER
 	select DRM_KMS_HELPER
 	help
