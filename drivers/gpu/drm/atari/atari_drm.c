@@ -30,7 +30,7 @@
 
 #include <drm/drm_atomic_helper.h>
 #include <drm/drm_atomic_state_helper.h>
-#include <drm/drm_client_setup.h>
+#include <drm/clients/drm_client_setup.h>
 #include <drm/drm_connector.h>
 #include <drm/drm_damage_helper.h>
 #include <drm/drm_drv.h>
@@ -4411,7 +4411,6 @@ static const struct drm_driver atari_drm_driver = {
 	DRM_FBDEV_SHMEM_DRIVER_OPS,
 	.name		 = DRIVER_NAME,
 	.desc		 = "Atari",
-	.date		 = "2020",
 	.major		 = 1,
 	.minor		 = 0,
 	.driver_features = DRIVER_MODESET | DRIVER_GEM | DRIVER_ATOMIC,
