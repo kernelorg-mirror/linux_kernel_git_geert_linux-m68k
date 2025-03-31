@@ -3601,7 +3601,7 @@ static int atari_drm_conn_get_modes(struct drm_connector *conn)
  * drm_mode_status.
  */
 static enum drm_mode_status atari_drm_conn_mode_valid(
-	struct drm_connector *conn, struct drm_display_mode *mode)
+	struct drm_connector *conn, const struct drm_display_mode *mode)
 {
 	// FIXME
 	return MODE_OK;
@@ -4679,4 +4679,5 @@ static void __exit atari_drm_exit(void)
 module_exit(atari_drm_exit);
 #endif
 
+MODULE_DESCRIPTION("Atari DRM driver");
 MODULE_LICENSE("GPL");
